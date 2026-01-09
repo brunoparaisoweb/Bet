@@ -1,0 +1,20 @@
+{
+  "teams": [
+    {"id": 1, "name": "Time A"},
+    {"id": 2, "name": "Time B"}
+  ],
+  "matches": [
+    {
+      "utcDate": "2025-01-05T18:00:00Z",
+      "homeTeam": {"id": 1, "name": "Time A"},
+      "awayTeam": {"id": 2, "name": "Time B"},
+      "score": {"fullTime": {"homeTeam": 2, "awayTeam": 1}}
+    },
+    {
+      "utcDate": "2025-01-01T18:00:00Z",
+      "homeTeam": {"id": 2, "name": "Time B"},
+      "awayTeam": {"id": 1, "name": "Time A"},
+      "score": {"fullTime": {"homeTeam": 0, "awayTeam": 0}}
+    }
+  ]
+}
