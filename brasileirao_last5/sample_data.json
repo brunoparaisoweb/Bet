@@ -1,20 +1,42 @@
 {
   "teams": [
     {"id": 1, "name": "Time A"},
-    {"id": 2, "name": "Time B"}
+    {"id": 2, "name": "Time B"},
+    {"id": 1783, "name": "Flamengo"},
+    {"id": 1784, "name": "Opponent A"},
+    {"id": 1785, "name": "Opponent B"},
+    {"id": 1786, "name": "Opponent C"}
   ],
   "matches": [
     {
-      "utcDate": "2025-01-05T18:00:00Z",
-      "homeTeam": {"id": 1, "name": "Time A"},
-      "awayTeam": {"id": 2, "name": "Time B"},
-      "score": {"fullTime": {"homeTeam": 2, "awayTeam": 1}}
+      "utcDate": "2025-06-30T19:00:00Z",
+      "homeTeam": {"id": 1783, "name": "Flamengo"},
+      "awayTeam": {"id": 1784, "name": "Opponent A"},
+      "score": {"fullTime": {"homeTeam": 3, "awayTeam": 1}}
     },
     {
-      "utcDate": "2025-01-01T18:00:00Z",
-      "homeTeam": {"id": 2, "name": "Time B"},
-      "awayTeam": {"id": 1, "name": "Time A"},
-      "score": {"fullTime": {"homeTeam": 0, "awayTeam": 0}}
+      "utcDate": "2025-06-22T20:00:00Z",
+      "homeTeam": {"id": 1785, "name": "Opponent B"},
+      "awayTeam": {"id": 1783, "name": "Flamengo"},
+      "score": {"fullTime": {"homeTeam": 2, "awayTeam": 2}}
+    },
+    {
+      "utcDate": "2025-06-15T18:30:00Z",
+      "homeTeam": {"id": 1783, "name": "Flamengo"},
+      "awayTeam": {"id": 1786, "name": "Opponent C"},
+      "score": {"fullTime": {"homeTeam": 1, "awayTeam": 0}}
+    },
+    {
+      "utcDate": "2025-06-07T21:00:00Z",
+      "homeTeam": {"id": 1784, "name": "Opponent A"},
+      "awayTeam": {"id": 1783, "name": "Flamengo"},
+      "score": {"fullTime": {"homeTeam": 0, "awayTeam": 1}}
+    },
+    {
+      "utcDate": "2025-05-29T19:45:00Z",
+      "homeTeam": {"id": 1783, "name": "Flamengo"},
+      "awayTeam": {"id": 1785, "name": "Opponent B"},
+      "score": {"fullTime": {"homeTeam": 4, "awayTeam": 2}}
     }
   ]
 }

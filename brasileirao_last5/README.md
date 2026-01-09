@@ -24,7 +24,7 @@ Uso
 Windows PowerShell:
 
 ```powershell
-$env:FOOTBALL_DATA_API_KEY = 'f259f5faf95d420e9df7388e91d487c6'
+$env:FOOTBALL_DATA_API_KEY='f259f5faf95d420e9df7388e91d487c6'
 python main.py
 ```
 
