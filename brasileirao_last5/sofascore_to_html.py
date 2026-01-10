@@ -53,6 +53,49 @@ def calcular_pontos_credito(time_nome, jogos):
     
     return pontos
 
+def calcular_bonus_mandante(jogos_rodada):
+    """Adiciona 0.5 pontos para times que jogam como mandante na próxima rodada."""
+    # Mapeamento de abreviações para nomes completos
+    abreviacoes = {
+        "FLU": "Fluminense", "Fluminense": "Fluminense",
+        "GRE": "Grêmio", "Grêmio": "Grêmio", "Gremio": "Grêmio",
+        "BOT": "Botafogo", "Botafogo": "Botafogo",
+        "CRU": "Cruzeiro", "Cruzeiro": "Cruzeiro",
+        "SAO": "São Paulo", "São Paulo": "São Paulo", "Sao Paulo": "São Paulo",
+        "FLA": "Flamengo", "Flamengo": "Flamengo",
+        "COR": "Corinthians", "Corinthians": "Corinthians",
+        "BAH": "Bahia", "Bahia": "Bahia",
+        "MIR": "Mirassol", "Mirassol": "Mirassol",
+        "VAS": "Vasco", "Vasco": "Vasco",
+        "CAM": "Atlético-MG", "ATL": "Atlético-MG", "Atlético-MG": "Atlético-MG", 
+        "Atletico-MG": "Atlético-MG", "Atlético MG": "Atlético-MG",
+        "PAL": "Palmeiras", "Palmeiras": "Palmeiras",
+        "INT": "Internacional", "Internacional": "Internacional",
+        "CAP": "Athletico-PR", "Athletico-PR": "Athletico-PR", "Athletico PR": "Athletico-PR",
+        "CFC": "Coritiba", "Coritiba": "Coritiba",
+        "RBB": "Bragantino", "BRA": "Bragantino", "Bragantino": "Bragantino",
+        "VIT": "Vitória", "Vitória": "Vitória", "Vitoria": "Vitória",
+        "REM": "Remo", "Remo": "Remo",
+        "CHA": "Chapecoense", "Chapecoense": "Chapecoense",
+        "SAN": "Santos", "Santos": "Santos"
+    }
+    
+    bonus = {}
+    for jogo in jogos_rodada:
+        time_mandante = jogo.get("time1", "").strip()
+        if time_mandante:
+            # Converte abreviação para nome completo
+            nome_completo = abreviacoes.get(time_mandante, time_mandante)
+            # Se ainda não encontrou, tenta normalizar
+            if nome_completo == time_mandante:
+                # Procura por match parcial (case-insensitive)
+                for abrev, nome in abreviacoes.items():
+                    if abrev.lower() in time_mandante.lower() or time_mandante.lower() in abrev.lower():
+                        nome_completo = nome
+                        break
+            bonus[nome_completo] = bonus.get(nome_completo, 0) + 0.5
+    return bonus
+
 def gerar_html(times_jogos, jogos_rodada, pontos_credito):
     html = '''<!DOCTYPE html>
 <html lang="pt-br">
@@ -191,6 +234,14 @@ def main():
         "Flamengo": calcular_pontos_credito("Flamengo", jogos_flamengo),
         "São Paulo": calcular_pontos_credito("São Paulo", jogos_sao_paulo)
     }
+    
+    # Adiciona bônus de 0.5 pontos para times mandantes na próxima rodada
+    bonus_mandante = calcular_bonus_mandante(jogos_rodada)
+    for time, bonus in bonus_mandante.items():
+        if time in pontos_credito:
+            pontos_credito[time] += bonus
+        else:
+            pontos_credito[time] = bonus
     
     html = gerar_html(times_jogos, jogos_rodada, pontos_credito)
     fname = "sofascore_result.html"
