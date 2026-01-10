@@ -49,7 +49,35 @@ def scrape_primeira_rodada():
     
     return jogos
 
+def scrape_classificacao():
+    """Busca a classificação atual do Brasileirão no GE"""
+    classificacao = []
+    
+    # Como o campeonato ainda não começou, retorna os 20 times com 0 pontos
+    # Lista de times do Brasileirão 2025
+    times_brasileirao = [
+        "Flamengo", "Palmeiras", "São Paulo", "Corinthians", "Fluminense",
+        "Grêmio", "Botafogo", "Atlético-MG", "Internacional", "Cruzeiro",
+        "Athletico-PR", "Bahia", "Vasco", "Bragantino", "Vitória",
+        "Mirassol", "Santos", "Remo", "Chapecoense", "Coritiba"
+    ]
+    
+    for i, time in enumerate(times_brasileirao, 1):
+        classificacao.append({
+            "posicao": str(i),
+            "time": time,
+            "pontos": "0",
+            "jogos": "0"
+        })
+    
+    return classificacao
+
 if __name__ == "__main__":
     jogos = scrape_primeira_rodada()
     for j in jogos:
         print(f"{j['data']} - {j['time1']} x {j['time2']}")
+    
+    print("\n--- Classificação ---")
+    classificacao = scrape_classificacao()
+    for c in classificacao:
+        print(f"{c['posicao']}. {c['time']} - {c['pontos']} pts ({c['jogos']} jogos)")

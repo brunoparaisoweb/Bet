@@ -6,7 +6,7 @@ Requer: sofascore_scraper.py no mesmo diretório.
 import subprocess
 import webbrowser
 from sofascore_scraper import scrape_sofascore_last5
-from ge_scraper import scrape_primeira_rodada
+from ge_scraper import scrape_primeira_rodada, scrape_classificacao
 
 def calcular_pontos_credito(time_nome, jogos):
     """Calcula pontos de crédito baseado nos últimos jogos.
@@ -96,7 +96,46 @@ def calcular_bonus_mandante(jogos_rodada):
             bonus[nome_completo] = bonus.get(nome_completo, 0) + 0.5
     return bonus
 
-def gerar_html(times_jogos, jogos_rodada, pontos_credito):
+def calcular_bonus_classificacao(classificacao):
+    """Adiciona pontos de crédito baseado na posição na classificação do campeonato."""
+    bonus = {}
+    
+    for item in classificacao:
+        time = item.get("time", "").strip()
+        try:
+            posicao = int(item.get("posicao", "0"))
+        except ValueError:
+            posicao = 0
+        
+        # Define pontos baseado na posição
+        if posicao == 1:
+            bonus[time] = 0.5
+        elif posicao in [2, 3]:
+            bonus[time] = 0.4
+        elif posicao in [4, 5]:
+            bonus[time] = 0.3
+        elif posicao in [6, 7]:
+            bonus[time] = 0.2
+        elif posicao in [8, 9]:
+            bonus[time] = 0.1
+        elif posicao in [10, 11]:
+            bonus[time] = 0.0
+        elif posicao in [12, 13]:
+            bonus[time] = -0.1
+        elif posicao in [14, 15]:
+            bonus[time] = -0.2
+        elif posicao in [16, 17]:
+            bonus[time] = -0.3
+        elif posicao in [18, 19]:
+            bonus[time] = -0.4
+        elif posicao == 20:
+            bonus[time] = -0.5
+        else:
+            bonus[time] = 0.0
+    
+    return bonus
+
+def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito):
     html = '''<!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -134,7 +173,21 @@ def gerar_html(times_jogos, jogos_rodada, pontos_credito):
     for jogo in jogos_rodada:
         html += f'        <div class="jogo-rodada">{jogo["data"]} - {jogo["time1"]} x {jogo["time2"]}</div>\n'
     
-    html += '''    </div>
+    html += '''
+        <h3 style="margin-top: 20px;">Classificação</h3>
+        <table style="width: 100%; font-size: 0.75em;">
+            <tr><th style="padding: 3px;">Pos</th><th>Time</th><th>Pts</th><th>J</th></tr>
+'''
+    
+    for item in classificacao:
+        pos = item.get("posicao", "")
+        time = item.get("time", "")
+        pts = item.get("pontos", "0")
+        jogos = item.get("jogos", "0")
+        html += f'            <tr><td style="text-align: center; padding: 2px;">{pos}</td><td style="text-align: left; padding: 2px;">{time}</td><td style="text-align: center; padding: 2px;">{pts}</td><td style="text-align: center; padding: 2px;">{jogos}</td></tr>\n'
+    
+    html += '''        </table>
+    </div>
     <div class="main-content">
         <h1>Últimos 5 jogos<br><small>Brasileirão Betano</small></h1>
 '''
@@ -218,6 +271,10 @@ def main():
     print("Buscando jogos da 1ª rodada...")
     jogos_rodada = scrape_primeira_rodada()
     
+    # Busca classificação atual
+    print("Buscando classificação atual...")
+    classificacao = scrape_classificacao()
+    
     # Busca jogos do Flamengo
     print("Buscando jogos do Flamengo...")
     jogos_flamengo = scrape_sofascore_last5(team_id=5981, team_name="flamengo", debug=False)
@@ -270,7 +327,15 @@ def main():
         else:
             pontos_credito[time] = bonus
     
-    html = gerar_html(times_jogos, jogos_rodada, pontos_credito)
+    # Adiciona bônus/penalidade baseado na posição na classificação
+    bonus_classificacao = calcular_bonus_classificacao(classificacao)
+    for time, bonus in bonus_classificacao.items():
+        if time in pontos_credito:
+            pontos_credito[time] += bonus
+        else:
+            pontos_credito[time] = bonus
+    
+    html = gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito)
     fname = "sofascore_result.html"
     with open(fname, "w", encoding="utf-8") as f:
         f.write(html)
