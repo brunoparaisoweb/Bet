@@ -16,14 +16,34 @@ except Exception as e:
     print("Playwright is required. Install with: pip install playwright", file=sys.stderr)
     raise
 
-URL = "https://www.sofascore.com/pt/football/team/flamengo/5981"
-
-def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
+def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", debug: bool = False) -> List[Dict]:
+    url = f"https://www.sofascore.com/pt/football/team/{team_name.lower()}/{team_id}"
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-        page.goto(URL, wait_until="networkidle", timeout=30000)
+        page.goto(url, wait_until="networkidle", timeout=30000)
         page.wait_for_timeout(3000)  # Aguarda carregamento inicial
+        
+        # Clica no logo/imagem do time para carregar as informações
+        try:
+            # Procura pela imagem do time
+            img_selector = f"img[alt*='{team_name}'], img[src*='team/{team_id}/image']"
+            img = page.query_selector(img_selector)
+            if img:
+                img.click()
+                page.wait_for_timeout(2000)
+                if debug:
+                    print(f"Debug: Clicou no logo do time")
+        except Exception as e:
+            if debug:
+                print(f"Debug: Não conseguiu clicar no logo: {e}")
+        
+        # Scroll para baixo para forçar carregamento de conteúdo
+        for _ in range(3):
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            page.wait_for_timeout(1000)
+        page.evaluate("window.scrollTo(0, 0)")
+        page.wait_for_timeout(1000)
         
         # Clica em todas as abas possíveis ('Todos', 'Fora', 'Away', etc.)
         abas = ["Todos", "Fora", "Away", "All", "Todos os jogos"]
@@ -48,8 +68,8 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
                 // Para se encontrar outro campeonato
                 if (/carioca|libertadores|sul-americana|intercontinental|fifa/i.test(cText) && cText.length < 50) break;
                 
-                // Se parecer um bloco de jogo (tem data + Flamengo + números)
-                if (/\d{2}\/\d{2}\/\d{2}/.test(cText) && /flamengo/i.test(cText) && cText.length > 20 && cText.length < 300) {
+                // Se parecer um bloco de jogo (tem data + time + números)
+                if (/\d{2}\/\d{2}\/\d{2}/.test(cText) && cText.length > 20 && cText.length < 300) {
                     const dateMatch = cText.match(/(\d{2}\/\d{2}\/\d{2,4})/);
                     const scoreMatch = cText.match(/(\d+)\s*[x:–\-]\s*(\d+)/i);
                     out.push({text: cText, comp: 'Brasileirão Betano', date: dateMatch ? dateMatch[0] : null, score: scoreMatch ? [scoreMatch[1], scoreMatch[2]] : null});
@@ -133,6 +153,15 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
             page_html = text
         browser.close()
     print(f"Debug: found {len(candidates)} candidate nodes")
+    if debug:
+        print(f"Debug: URL acessada: {url}")
+        # Mostra amostra do conteúdo da página
+        if page_html and isinstance(page_html, str):
+            # Procura por "Brasileirão" no HTML
+            brasileirao_count = page_html.lower().count("brasileirão")
+            betano_count = page_html.lower().count("betano")
+            print(f"Debug: 'Brasileirão' aparece {brasileirao_count} vezes no HTML")
+            print(f"Debug: 'Betano' aparece {betano_count} vezes no HTML")
     for i, c in enumerate(candidates[:10]):
         print(i, c)
     try:
@@ -197,27 +226,27 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
             if re.match(r"\d+\s*[x:–\-]\s*\d+", l):
                 continue
             team_lines.append(l)
-        # Procura Flamengo em qualquer linha de time
-        flamengo_idx = None
+        # Procura o time em qualquer linha de time
+        target_idx = None
         for idx, t in enumerate(team_lines):
-            if "flamengo" in t.lower():
-                flamengo_idx = idx
+            if team_name.lower() in t.lower():
+                target_idx = idx
                 break
-        if flamengo_idx is not None and len(team_lines) >= 2:
-            other_idx = 1 - flamengo_idx if len(team_lines) == 2 else (flamengo_idx + 1 if flamengo_idx == 0 else flamengo_idx - 1)
+        if target_idx is not None and len(team_lines) >= 2:
+            other_idx = 1 - target_idx if len(team_lines) == 2 else (target_idx + 1 if target_idx == 0 else target_idx - 1)
             left = team_lines[0]
             right = team_lines[1] if len(team_lines) > 1 else "-"
-            if flamengo_idx == 0:
-                home = {"id": 5981, "name": team_lines[0]}
+            if target_idx == 0:
+                home = {"id": team_id, "name": team_lines[0]}
                 away = {"id": None, "name": team_lines[1] if len(team_lines) > 1 else "-"}
                 adversario_nome = team_lines[1] if len(team_lines) > 1 else "-"
             else:
                 home = {"id": None, "name": team_lines[0]}
-                away = {"id": 5981, "name": team_lines[1] if len(team_lines) > 1 else "-"}
+                away = {"id": team_id, "name": team_lines[1] if len(team_lines) > 1 else "-"}
                 adversario_nome = team_lines[0]
         else:
             if debug:
-                print(f"Descartado: não reconheceu Flamengo em {team_lines}")
+                print(f"Descartado: não reconheceu {team_name} em {team_lines}")
             continue
         # Placar: busca números "soltos" após os nomes dos times (1º e 3º número)
         nums = []
@@ -286,7 +315,7 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
     return results[:5]
 
 def main():
-    matches = scrape_sofascore_last5(debug=True)
+    matches = scrape_sofascore_last5(team_id=5981, team_name="flamengo", debug=True)
     if not matches:
         print("Nenhum jogo encontrado.")
         return
