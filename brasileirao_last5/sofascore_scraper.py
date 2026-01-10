@@ -26,24 +26,42 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
         page.wait_for_timeout(1200)
         js = r"""
         (() => {
-            const nodes = Array.from(document.querySelectorAll('a[href*="/match/"]'));
+            // Busca todos os títulos de campeonato e seus jogos subsequentes
+            const container = document.querySelector('[data-testid="team-matches"]') || document.body;
+            const nodes = Array.from(container.querySelectorAll('*'));
             const out = [];
-            for (const node of nodes) {
-                const text = (node.innerText || node.textContent || '').trim();
-                if (!text) continue;
-                if (!/flamengo/i.test(text)) continue;
-                let comp = '';
-                let el = node;
-                for (let depth = 0; depth < 8 && el; depth++) {
-                    const prev = el.previousElementSibling;
-                    if (prev && /brasileir|betano/i.test(prev.innerText || '')) { comp = prev.innerText.trim(); break; }
-                    const parentPrev = el.parentElement ? el.parentElement.previousElementSibling : null;
-                    if (parentPrev && /brasileir|betano/i.test(parentPrev.innerText || '')) { comp = parentPrev.innerText.trim(); break; }
-                    el = el.parentElement;
+            let i = 0;
+            while (i < nodes.length) {
+                const node = nodes[i];
+                // Procura bloco de campeonato
+                if (/brasileir[ãa]o betano/i.test(node.innerText || '')) {
+                    // Coleta todos os jogos até o próximo título de campeonato
+                    let j = i + 1;
+                    while (j < nodes.length) {
+                        const n = nodes[j];
+                        // Se encontrar outro campeonato, para
+                        if (/carioca|libertadores|sul-americana|intercontinental|fifa|amistoso|pyramids|psg|campeonato/i.test(n.innerText || '')) break;
+                        // Jogo: link para /match/ e menciona Flamengo
+                        if (n.tagName === 'A' && /\/match\//.test(n.getAttribute('href') || '') && /flamengo/i.test(n.innerText || '')) {
+                            // Sobe até o pai tr/div mais próximo
+                            let parent = n;
+                            for (let up = 0; up < 4 && parent; up++) {
+                                if (parent.tagName === 'TR' || parent.tagName === 'DIV') break;
+                                parent = parent.parentElement;
+                            }
+                            let bloco = parent ? parent.innerText : n.innerText;
+                            bloco = (bloco || '').trim();
+                            // Extrai data, placar e times do bloco
+                            const dateMatch = bloco.match(/\d{4}-\d{2}-\d{2}/) || bloco.match(/\d{2}\/\d{2}\/\d{4}/);
+                            const scoreMatch = bloco.match(/(\d+)\s*[x:–\-]\s*(\d+)/i);
+                            out.push({text: bloco, comp: 'Brasileirão Betano', date: dateMatch ? dateMatch[0] : null, score: scoreMatch ? [scoreMatch[1], scoreMatch[2]] : null});
+                        }
+                        j++;
+                    }
+                    i = j;
+                    continue;
                 }
-                const dateMatch = text.match(/\d{4}-\d{2}-\d{2}/) || text.match(/\d{2}\/\d{2}\/\d{4}/);
-                const scoreMatch = text.match(/(\d+)\s*[x:–\-]\s*(\d+)/i);
-                out.push({text, comp, date: dateMatch ? dateMatch[0] : null, score: scoreMatch ? [scoreMatch[1], scoreMatch[2]] : null});
+                i++;
             }
             return out;
         })();
@@ -69,10 +87,16 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
     results: List[Dict] = []
     for item in candidates:
         comp = (item.get("comp") or "")
-        # Filtro: só aceita se comp for exatamente "Brasileirão Betano" (ignorando maiúsculas/minúsculas e espaços)
-        # Aceita só se "Brasileirão Betano" for uma linha isolada no campo comp
-        comp_lines = [line.strip().lower() for line in comp.splitlines()]
-        if "brasileirão betano" not in comp_lines:
+        txt = item.get("text")
+        # Se comp não mencionar Brasileirão Betano, mas também não mencionar outros campeonatos, aceita se adversário for Série A
+        comp_ok = False
+        if re.search(r"brasileir[ãa]o betano", comp, re.I):
+            comp_ok = True
+        elif not comp.strip():
+            # Se comp está vazio, tenta garantir que não é outro campeonato pelo texto
+            if not re.search(r"carioca|libertadores|sul-americana|intercontinental|fifa|amistoso|pyramids|psg", (txt or ""), re.I):
+                comp_ok = True
+        if not comp_ok:
             if debug:
                 print(f"Ignorado: {item.get('text')[:40]}... | comp='{comp}'")
             continue
@@ -82,27 +106,16 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
         if not isinstance(txt, str):
             txt = ""
         lines = [l.strip() for l in txt.splitlines() if l.strip()]
-        date = item.get("date")
-        if not date:
-            # Busca a primeira linha que parece uma data
-            for l in lines:
-                m = re.match(r"(\d{1,2}/\d{1,2}/\d{2,4})", l)
-                if m:
-                    date = m.group(1)
-                    break
-        # Busca a primeira linha que parece uma data, se necessário
-        date = item.get("date")
-        if not date:
-            for l in lines:
-                m = re.match(r"(\d{1,2}/\d{1,2}/\d{2,4})", l)
-                if m:
-                    date = m.group(1)
-                    break
-        # Procura linhas que parecem nomes de times (ignorando datas, tempos, placares)
-        team_lines = []
-        score = item.get("score")
+        # Data: pega a primeira linha que parece data (dd/mm/aa ou dd/mm/aaaa)
+        date = None
         for l in lines:
-            # Considera nome de time se não for data, tempo, placar ou resultado
+            m = re.match(r"(\d{1,2}/\d{1,2}/\d{2,4})", l)
+            if m:
+                date = m.group(1)
+                break
+        # Times: pega as duas primeiras linhas que não são data, tempo, placar ou resultado
+        team_lines = []
+        for l in lines:
             if re.match(r"\d{1,2}/\d{1,2}/\d{2,4}", l):
                 continue
             if re.match(r"[FA][P\d]+", l):  # F2°T, AP, etc
@@ -114,29 +127,27 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
             if re.match(r"\d+\s*[x:–\-]\s*\d+", l):
                 continue
             team_lines.append(l)
-        # Espera-se que os dois primeiros nomes de time sejam mandante e visitante
         if len(team_lines) >= 2:
             left = team_lines[0]
             right = team_lines[1]
         else:
             left = right = "-"
-        # Placar: tenta extrair do campo score, se não conseguir, tenta pegar dois primeiros números das linhas
-        if score:
-            try:
-                home_goals = int(score[0])
-                away_goals = int(score[1])
-            except Exception:
-                home_goals = away_goals = None
-        else:
-            # Busca dois primeiros números "soltos" nas linhas
-            nums = []
-            for l in lines:
-                if re.match(r"^\d+$", l):
-                    nums.append(int(l))
+        # Placar: busca dois primeiros números "soltos" após os nomes dos times
+        nums = []
+        found_teams = 0
+        for l in lines:
+            if found_teams < 2:
+                if l == left or l == right:
+                    found_teams += 1
+                continue
+            if re.match(r"^\d+$", l):
+                nums.append(int(l))
             if len(nums) >= 2:
-                home_goals, away_goals = nums[0], nums[1]
-            else:
-                home_goals = away_goals = None
+                break
+        if len(nums) >= 2:
+            home_goals, away_goals = nums[0], nums[1]
+        else:
+            home_goals = away_goals = None
         # Identifica quem é Flamengo
         if re.search(r"^flamengo\\b", left, re.I) or ("flamengo" in left.lower() and "flamengo" in left.lower().split()[0:2]):
             home = {"id": 5981, "name": "Flamengo"}
@@ -147,12 +158,32 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
         else:
             home = {"id": 5981, "name": left}
             away = {"id": None, "name": right}
-        results.append({
-            "utcDate": date,
-            "homeTeam": home,
-            "awayTeam": away,
-            "score": {"fullTime": {"homeTeam": home_goals, "awayTeam": away_goals}},
-        })
+        # Lista dos clubes da Série A (2024, pode ser atualizada)
+        serie_a = [
+            "flamengo", "palmeiras", "são paulo", "corinthians", "santos", "vasco da gama", "vasco",
+            "mirassol", "vitória", "vitoria", "fortaleza",
+            "botafogo", "fluminense", "grêmio", "internacional", "athletico-pr", "atletico-pr", "atlético-pr",
+            "atletico-mg", "atlético-mg", "cruzeiro", "bahia", "fortaleza", "cuiabá", "juventude", "bragantino",
+            "américa-mg", "goiás", "coritiba", "avaí", "chapecoense", "ceará", "sport", "ponte preta",
+            "rb bragantino", "red bull bragantino"
+        ]
+        # Só adiciona se mandante, visitante e placar forem válidos e adversário for Série A (contém)
+        adversario = home["name"].lower() if home["name"].lower() != "flamengo" else away["name"].lower()
+        def is_serie_a(nome):
+            return any(clube in nome for clube in serie_a)
+        if (
+            home.get("name", "-") != "-" and
+            away.get("name", "-") != "-" and
+            home_goals is not None and
+            away_goals is not None and
+            is_serie_a(adversario)
+        ):
+            results.append({
+                "utcDate": date,
+                "homeTeam": home,
+                "awayTeam": away,
+                "score": {"fullTime": {"homeTeam": home_goals, "awayTeam": away_goals}},
+            })
     # Ordena por data (se possível) do mais recente para o mais antigo
     def parse_date(d):
         if not d:
