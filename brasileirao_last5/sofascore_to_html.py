@@ -18,8 +18,10 @@ def gerar_html(jogos):
         h1 { color: #d00; }
         table { border-collapse: collapse; margin: 20px auto; background: #fff; box-shadow: 0 2px 8px #0001; }
         th, td { padding: 10px 18px; border: 1px solid #ccc; text-align: center; }
-        th { background: #d00; color: #fff; }
-        tr:nth-child(even) { background: #f2f2f2; }
+        th { background: #87CEEB; color: #000; }
+        .vitoria { background: #4CAF50 !important; color: #fff; }
+        .derrota { background: #f44336 !important; color: #fff; }
+        .empate { background: #9e9e9e !important; color: #fff; }
     </style>
 </head>
 <body>
@@ -35,7 +37,28 @@ def gerar_html(jogos):
         hg = full.get("homeTeam")
         ag = full.get("awayTeam")
         score = f"{hg} x {ag}" if hg is not None and ag is not None else "-"
-        html += f"        <tr><td>{data}</td><td>{home}</td><td>{away}</td><td>{score}</td></tr>\n"
+        
+        # Determina o resultado do Flamengo
+        classe = ""
+        if hg is not None and ag is not None:
+            # Verifica se Flamengo é mandante ou visitante
+            flamengo_mandante = "flamengo" in home.lower()
+            if flamengo_mandante:
+                if hg > ag:
+                    classe = "vitoria"
+                elif hg < ag:
+                    classe = "derrota"
+                else:
+                    classe = "empate"
+            else:
+                if ag > hg:
+                    classe = "vitoria"
+                elif ag < hg:
+                    classe = "derrota"
+                else:
+                    classe = "empate"
+        
+        html += f'        <tr class="{classe}"><td>{data}</td><td>{home}</td><td>{away}</td><td>{score}</td></tr>\n'
     html += "    </table>\n</body>\n</html>"
     return html
 
