@@ -104,22 +104,23 @@ def gerar_html(times_jogos, jogos_rodada, pontos_credito):
     <title>Últimos 5 jogos - Brasileirão Betano</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f7f7f7; display: flex; }
-        .sidebar { width: 250px; padding: 10px; background: #fff; box-shadow: 2px 0 8px #0001; }
-        .main-content { flex: 1; padding: 10px; }
-        .sidebar-right { width: 250px; padding: 10px; background: #fff; box-shadow: -2px 0 8px #0001; }
-        h1 { color: #333; text-align: center; font-size: 1.2em; }
-        h2 { color: #d00; text-align: center; margin-top: 20px; font-size: 1em; }
-        h3 { color: #333; font-size: 0.9em; margin: 10px 0; }
-        table { border-collapse: collapse; margin: 10px auto; background: #fff; box-shadow: 0 2px 8px #0001; font-size: 0.8em; }
-        th, td { padding: 5px 9px; border: 1px solid #ccc; text-align: center; }
+        .sidebar { width: 250px; padding: 15px; background: #fff; box-shadow: 2px 0 8px #0001; font-size: 0.9em; }
+        .main-content { flex: 1; padding: 8px; display: flex; flex-wrap: wrap; justify-content: space-around; }
+        .sidebar-right { width: 250px; padding: 15px; background: #fff; box-shadow: -2px 0 8px #0001; font-size: 0.9em; }
+        .time-section { width: 18%; min-width: 180px; margin: 5px; }
+        h1 { color: #333; text-align: center; font-size: 0.9em; margin: 5px 0; width: 100%; }
+        h2 { color: #d00; text-align: center; margin: 8px 0 5px 0; font-size: 0.75em; }
+        h3 { color: #333; font-size: 1.0em; margin: 12px 0; }
+        table { border-collapse: collapse; margin: 5px auto; background: #fff; box-shadow: 0 1px 4px #0001; font-size: 0.65em; width: 100%; }
+        th, td { padding: 3px 5px; border: 1px solid #ccc; text-align: center; font-size: 0.85em; }
         th { background: #87CEEB; color: #000; }
         .vitoria { background: #4CAF50 !important; color: #fff; }
         .derrota { background: #f44336 !important; color: #fff; }
         .empate { background: #9e9e9e !important; color: #fff; }
-        .jogo-rodada { font-size: 0.75em; padding: 5px; border-bottom: 1px solid #eee; }
+        .jogo-rodada { font-size: 0.85em; padding: 5px; border-bottom: 1px solid #eee; }
         .jogo-rodada:last-child { border-bottom: none; }
-        .times-table { width: 100%; font-size: 0.75em; }
-        .times-table td { text-align: left; padding: 4px 6px; }
+        .times-table { width: 100%; font-size: 0.85em; }
+        .times-table td { text-align: left; padding: 5px 8px; }
         .times-table td:last-child { text-align: center; font-weight: bold; }
         .top3 { background: #FFD700 !important; }
         .negativo { background: #ff6b6b !important; color: #fff; }
@@ -138,6 +139,7 @@ def gerar_html(times_jogos, jogos_rodada, pontos_credito):
         <h1>Últimos 5 jogos<br><small>Brasileirão Betano</small></h1>
 '''
     for time_nome, jogos in times_jogos:
+        html += f'    <div class="time-section">\n'
         html += f'    <h2>{time_nome}</h2>\n'
         html += '    <table>\n'
         html += '        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>\n'
@@ -173,6 +175,7 @@ def gerar_html(times_jogos, jogos_rodada, pontos_credito):
             
             html += f'        <tr class="{classe}"><td>{data}</td><td>{home}</td><td>{away}</td><td>{score}</td></tr>\n'
         html += "    </table>\n"
+        html += "    </div>\n"
     
     html += '''    </div>
     <div class="sidebar-right">
@@ -221,18 +224,24 @@ def main():
     
     # Busca jogos do São Paulo
     print("Buscando jogos do São Paulo...")
-    jogos_sao_paulo = scrape_sofascore_last5(team_id=1981, team_name="São Paulo", debug=True)
+    jogos_sao_paulo = scrape_sofascore_last5(team_id=1981, team_name="São Paulo", debug=False)
+    
+    # Busca jogos do Fluminense
+    print("Buscando jogos do Fluminense...")
+    jogos_fluminense = scrape_sofascore_last5(team_id=1961, team_name="Fluminense", debug=False, click_navigation=False)
     
     # Gera HTML com ambos os times
     times_jogos = [
         ("Flamengo", jogos_flamengo),
-        ("São Paulo", jogos_sao_paulo)
+        ("São Paulo", jogos_sao_paulo),
+        ("Fluminense", jogos_fluminense)
     ]
     
     # Calcula pontos de crédito
     pontos_credito = {
         "Flamengo": calcular_pontos_credito("Flamengo", jogos_flamengo),
-        "São Paulo": calcular_pontos_credito("São Paulo", jogos_sao_paulo)
+        "São Paulo": calcular_pontos_credito("São Paulo", jogos_sao_paulo),
+        "Fluminense": calcular_pontos_credito("Fluminense", jogos_fluminense)
     }
     
     # Adiciona bônus de 0.5 pontos para times mandantes na próxima rodada

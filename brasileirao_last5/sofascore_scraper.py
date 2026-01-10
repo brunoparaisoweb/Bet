@@ -16,7 +16,7 @@ except Exception as e:
     print("Playwright is required. Install with: pip install playwright", file=sys.stderr)
     raise
 
-def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", debug: bool = False) -> List[Dict]:
+def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", debug: bool = False, click_navigation: bool = True) -> List[Dict]:
     url = f"https://www.sofascore.com/pt/football/team/{team_name.lower()}/{team_id}"
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -60,16 +60,19 @@ def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", deb
         
         // Se encontrar "Brasileirão Betano"
         if (/brasileir[ãa]o betano/i.test(text) && text.length < 100) {
-            // Procura jogos nos próximos elementos
-            for (let j = i + 1; j < Math.min(i + 50, allElements.length); j++) {
+            // Procura jogos nos próximos elementos (aumentado para 200)
+            for (let j = i + 1; j < Math.min(i + 200, allElements.length); j++) {
                 const candidate = allElements[j];
                 const cText = (candidate.innerText || '').trim();
                 
-                // Para se encontrar outro campeonato
-                if (/carioca|libertadores|sul-americana|intercontinental|fifa/i.test(cText) && cText.length < 50) break;
+                // Para se encontrar outro campeonato (adicionado Carioca)
+                if (/carioca|libertadores|sul-americana|intercontinental|fifa|amistoso/i.test(cText) && cText.length < 100) break;
                 
                 // Se parecer um bloco de jogo (tem data + time + números)
-                if (/\d{2}\/\d{2}\/\d{2}/.test(cText) && cText.length > 20 && cText.length < 300) {
+                // E NÃO contém "Carioca" no texto
+                if (/\d{2}\/\d{2}\/\d{2}/.test(cText) && 
+                    !/carioca/i.test(cText) &&
+                    cText.length > 20 && cText.length < 300) {
                     const dateMatch = cText.match(/(\d{2}\/\d{2}\/\d{2,4})/);
                     const scoreMatch = cText.match(/(\d+)\s*[x:–\-]\s*(\d+)/i);
                     out.push({text: cText, comp: 'Brasileirão Betano', date: dateMatch ? dateMatch[0] : null, score: scoreMatch ? [scoreMatch[1], scoreMatch[2]] : null});
@@ -97,28 +100,41 @@ def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", deb
             except Exception:
                 continue
         
-        # DEPOIS: Clica na seta esquerda para carregar jogos mais antigos
-        try:
-            clicked = page.evaluate("""
-                (() => {
-                    // Procura pelo botão específico com SVG de seta esquerda
-                    const buttons = Array.from(document.querySelectorAll('button'));
-                    for (const btn of buttons) {
-                        // Verifica se contém SVG com viewBox="0 0 24 24" e path com d começando com "M6 11.99"
-                        const svg = btn.querySelector('svg[viewBox="0 0 24 24"]');
-                        if (svg) {
-                            const path = svg.querySelector('path');
-                            if (path && path.getAttribute('d').startsWith('M6 11.99')) {
-                                btn.click();
-                                return true;
+        # DEPOIS: Clica na seta esquerda DUAS VEZES para carregar mais jogos antigos (se habilitado)
+        if click_navigation:
+            for click_num in range(2):
+                try:
+                    clicked = page.evaluate("""
+                        (() => {
+                            // Procura pelo botão específico com SVG de seta esquerda
+                            const buttons = Array.from(document.querySelectorAll('button'));
+                            for (const btn of buttons) {
+                                // Verifica se contém SVG com viewBox="0 0 24 24" e path com d começando com "M6 11.99"
+                                const svg = btn.querySelector('svg[viewBox="0 0 24 24"]');
+                                if (svg) {
+                                    const path = svg.querySelector('path');
+                                    if (path && path.getAttribute('d').startsWith('M6 11.99')) {
+                                        btn.click();
+                                        return true;
+                                    }
+                                }
                             }
-                        }
-                    }
-                    return false;
-                })();
-            """)
-            if clicked:
-                page.wait_for_timeout(3000)  # Aguarda carregar novos jogos
+                            return false;
+                        })();
+                    """)
+                    if clicked:
+                        page.wait_for_timeout(4000)  # Aguarda carregar novos jogos
+                    else:
+                        break
+                except Exception:
+                    break
+        
+        # Scroll adicional para garantir carregamento
+        try:
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            page.wait_for_timeout(1000)
+            page.evaluate("window.scrollTo(0, 0)")
+            page.wait_for_timeout(1000)
         except Exception:
             pass
         
