@@ -23,53 +23,110 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         page.goto(URL, wait_until="networkidle", timeout=30000)
-        page.wait_for_timeout(1200)
+        page.wait_for_timeout(3000)  # Aguarda carregamento inicial
+        
+        # Clica em todas as abas possíveis ('Todos', 'Fora', 'Away', etc.)
+        abas = ["Todos", "Fora", "Away", "All", "Todos os jogos"]
+        all_candidates = []
         js = r"""
-        (() => {
-            // Busca todos os títulos de campeonato e seus jogos subsequentes
-            const container = document.querySelector('[data-testid="team-matches"]') || document.body;
-            const nodes = Array.from(container.querySelectorAll('*'));
-            const out = [];
-            let i = 0;
-            while (i < nodes.length) {
-                const node = nodes[i];
-                // Procura bloco de campeonato
-                if (/brasileir[ãa]o betano/i.test(node.innerText || '')) {
-                    // Coleta todos os jogos até o próximo título de campeonato
-                    let j = i + 1;
-                    while (j < nodes.length) {
-                        const n = nodes[j];
-                        // Se encontrar outro campeonato, para
-                        if (/carioca|libertadores|sul-americana|intercontinental|fifa|amistoso|pyramids|psg|campeonato/i.test(n.innerText || '')) break;
-                        // Jogo: link para /match/ e menciona Flamengo
-                        if (n.tagName === 'A' && /\/match\//.test(n.getAttribute('href') || '') && /flamengo/i.test(n.innerText || '')) {
-                            // Sobe até o pai tr/div mais próximo
-                            let parent = n;
-                            for (let up = 0; up < 4 && parent; up++) {
-                                if (parent.tagName === 'TR' || parent.tagName === 'DIV') break;
-                                parent = parent.parentElement;
-                            }
-                            let bloco = parent ? parent.innerText : n.innerText;
-                            bloco = (bloco || '').trim();
-                            // Extrai data, placar e times do bloco
-                            const dateMatch = bloco.match(/\d{4}-\d{2}-\d{2}/) || bloco.match(/\d{2}\/\d{2}\/\d{4}/);
-                            const scoreMatch = bloco.match(/(\d+)\s*[x:–\-]\s*(\d+)/i);
-                            out.push({text: bloco, comp: 'Brasileirão Betano', date: dateMatch ? dateMatch[0] : null, score: scoreMatch ? [scoreMatch[1], scoreMatch[2]] : null});
-                        }
-                        j++;
-                    }
-                    i = j;
-                    continue;
+(() => {
+    // Busca TODOS os elementos que contêm "Brasileirão Betano" e seus jogos adjacentes
+    const allElements = Array.from(document.querySelectorAll('*'));
+    const out = [];
+    
+    for (let i = 0; i < allElements.length; i++) {
+        const el = allElements[i];
+        const text = (el.innerText || '').trim();
+        
+        // Se encontrar "Brasileirão Betano"
+        if (/brasileir[ãa]o betano/i.test(text) && text.length < 100) {
+            // Procura jogos nos próximos elementos
+            for (let j = i + 1; j < Math.min(i + 50, allElements.length); j++) {
+                const candidate = allElements[j];
+                const cText = (candidate.innerText || '').trim();
+                
+                // Para se encontrar outro campeonato
+                if (/carioca|libertadores|sul-americana|intercontinental|fifa/i.test(cText) && cText.length < 50) break;
+                
+                // Se parecer um bloco de jogo (tem data + Flamengo + números)
+                if (/\d{2}\/\d{2}\/\d{2}/.test(cText) && /flamengo/i.test(cText) && cText.length > 20 && cText.length < 300) {
+                    const dateMatch = cText.match(/(\d{2}\/\d{2}\/\d{2,4})/);
+                    const scoreMatch = cText.match(/(\d+)\s*[x:–\-]\s*(\d+)/i);
+                    out.push({text: cText, comp: 'Brasileirão Betano', date: dateMatch ? dateMatch[0] : null, score: scoreMatch ? [scoreMatch[1], scoreMatch[2]] : null});
                 }
-                i++;
             }
-            return out;
-        })();
+        }
+    }
+    
+    return out;
+})();
         """
-        candidates = []
+        
+        # PRIMEIRO: Coleta jogos da página inicial (mais recentes)
+        for aba in abas:
+            try:
+                btn = page.query_selector(f"button:has-text('{aba}')")
+                if btn:
+                    btn.click()
+                    page.wait_for_timeout(1500)
+            except Exception:
+                continue
+            try:
+                candidates = page.evaluate(js)
+                all_candidates.extend(candidates)
+            except Exception:
+                continue
+        
+        # DEPOIS: Clica na seta esquerda para carregar jogos mais antigos
+        try:
+            clicked = page.evaluate("""
+                (() => {
+                    // Procura pelo botão específico com SVG de seta esquerda
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    for (const btn of buttons) {
+                        // Verifica se contém SVG com viewBox="0 0 24 24" e path com d começando com "M6 11.99"
+                        const svg = btn.querySelector('svg[viewBox="0 0 24 24"]');
+                        if (svg) {
+                            const path = svg.querySelector('path');
+                            if (path && path.getAttribute('d').startsWith('M6 11.99')) {
+                                btn.click();
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                })();
+            """)
+            if clicked:
+                page.wait_for_timeout(3000)  # Aguarda carregar novos jogos
+        except Exception:
+            pass
+        
+        # Coleta jogos da página após clicar na seta (jogos mais antigos)
+        for aba in abas:
+            try:
+                btn = page.query_selector(f"button:has-text('{aba}')")
+                if btn:
+                    btn.click()
+                    page.wait_for_timeout(1500)
+            except Exception:
+                continue
+            try:
+                candidates = page.evaluate(js)
+                all_candidates.extend(candidates)
+            except Exception:
+                continue
+        # Remove duplicados pelo texto do bloco
+        seen = set()
+        unique_candidates = []
+        for c in all_candidates:
+            t = c.get('text')
+            if t and t not in seen:
+                unique_candidates.append(c)
+                seen.add(t)
+        candidates = unique_candidates
         page_html = None
         try:
-            candidates = page.evaluate(js)
             page_html = page.content()
         except Exception:
             text = page.inner_text("body")
@@ -113,7 +170,20 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
             if m:
                 date = m.group(1)
                 break
-        # Times: pega as duas primeiras linhas que não são data, tempo, placar ou resultado
+        
+        # Filtra apenas jogos de 2025
+        if date:
+            parts = date.split("/")
+            year = parts[2] if len(parts) == 3 else None
+            if year:
+                if len(year) == 2:
+                    year = "20" + year
+                if year != "2025":
+                    if debug:
+                        print(f"Descartado: jogo de {year} (queremos apenas 2025)")
+                    continue
+        
+        # Times: pega todas as linhas que não são data, tempo, placar ou resultado
         team_lines = []
         for l in lines:
             if re.match(r"\d{1,2}/\d{1,2}/\d{2,4}", l):
@@ -127,37 +197,46 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
             if re.match(r"\d+\s*[x:–\-]\s*\d+", l):
                 continue
             team_lines.append(l)
-        if len(team_lines) >= 2:
+        # Procura Flamengo em qualquer linha de time
+        flamengo_idx = None
+        for idx, t in enumerate(team_lines):
+            if "flamengo" in t.lower():
+                flamengo_idx = idx
+                break
+        if flamengo_idx is not None and len(team_lines) >= 2:
+            other_idx = 1 - flamengo_idx if len(team_lines) == 2 else (flamengo_idx + 1 if flamengo_idx == 0 else flamengo_idx - 1)
             left = team_lines[0]
-            right = team_lines[1]
+            right = team_lines[1] if len(team_lines) > 1 else "-"
+            if flamengo_idx == 0:
+                home = {"id": 5981, "name": team_lines[0]}
+                away = {"id": None, "name": team_lines[1] if len(team_lines) > 1 else "-"}
+                adversario_nome = team_lines[1] if len(team_lines) > 1 else "-"
+            else:
+                home = {"id": None, "name": team_lines[0]}
+                away = {"id": 5981, "name": team_lines[1] if len(team_lines) > 1 else "-"}
+                adversario_nome = team_lines[0]
         else:
-            left = right = "-"
-        # Placar: busca dois primeiros números "soltos" após os nomes dos times
+            if debug:
+                print(f"Descartado: não reconheceu Flamengo em {team_lines}")
+            continue
+        # Placar: busca números "soltos" após os nomes dos times (1º e 3º número)
         nums = []
         found_teams = 0
         for l in lines:
             if found_teams < 2:
-                if l == left or l == right:
+                if l in team_lines:
                     found_teams += 1
                 continue
             if re.match(r"^\d+$", l):
                 nums.append(int(l))
-            if len(nums) >= 2:
+            if len(nums) >= 4:
                 break
-        if len(nums) >= 2:
+        if len(nums) >= 4:
+            home_goals, away_goals = nums[0], nums[2]
+        elif len(nums) >= 2:
             home_goals, away_goals = nums[0], nums[1]
         else:
             home_goals = away_goals = None
-        # Identifica quem é Flamengo
-        if re.search(r"^flamengo\\b", left, re.I) or ("flamengo" in left.lower() and "flamengo" in left.lower().split()[0:2]):
-            home = {"id": 5981, "name": "Flamengo"}
-            away = {"id": None, "name": right}
-        elif "flamengo" in right.lower():
-            away = {"id": 5981, "name": "Flamengo"}
-            home = {"id": None, "name": left}
-        else:
-            home = {"id": 5981, "name": left}
-            away = {"id": None, "name": right}
         # Lista dos clubes da Série A (2024, pode ser atualizada)
         serie_a = [
             "flamengo", "palmeiras", "são paulo", "corinthians", "santos", "vasco da gama", "vasco",
@@ -167,16 +246,23 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
             "américa-mg", "goiás", "coritiba", "avaí", "chapecoense", "ceará", "sport", "ponte preta",
             "rb bragantino", "red bull bragantino"
         ]
-        # Só adiciona se mandante, visitante e placar forem válidos e adversário for Série A (contém)
-        adversario = home["name"].lower() if home["name"].lower() != "flamengo" else away["name"].lower()
+        import unicodedata
+        def normalize_nome(nome):
+            nome = nome.lower()
+            nome = unicodedata.normalize('NFKD', nome)
+            nome = ''.join([c for c in nome if not unicodedata.combining(c)])
+            nome = nome.replace('-', '').replace(' ', '')
+            return nome
+        serie_a_norm = [normalize_nome(clube) for clube in serie_a]
         def is_serie_a(nome):
-            return any(clube in nome for clube in serie_a)
+            nome_norm = normalize_nome(nome)
+            return any(clube in nome_norm for clube in serie_a_norm)
         if (
             home.get("name", "-") != "-" and
             away.get("name", "-") != "-" and
             home_goals is not None and
             away_goals is not None and
-            is_serie_a(adversario)
+            is_serie_a(adversario_nome)
         ):
             results.append({
                 "utcDate": date,
@@ -184,6 +270,8 @@ def scrape_sofascore_last5(debug: bool = False) -> List[Dict]:
                 "awayTeam": away,
                 "score": {"fullTime": {"homeTeam": home_goals, "awayTeam": away_goals}},
             })
+        elif debug:
+            print(f"Descartado: {home['name']} x {away['name']} | adversario norm: {normalize_nome(adversario_nome)}")
     # Ordena por data (se possível) do mais recente para o mais antigo
     def parse_date(d):
         if not d:
