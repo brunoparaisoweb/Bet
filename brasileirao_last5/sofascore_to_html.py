@@ -263,7 +263,93 @@ def calcular_bonus_classificacao(classificacao):
     
     return bonus
 
-def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resultados_h2h=None):
+def analisar_apostas(jogos_rodada, pontos_credito):
+    """Analisa os confrontos da rodada e retorna apostas sugeridas.
+    Retorna lista de times recomendados quando a diferença de créditos é >= 2.
+    """
+    # Mapeamento de abreviações para nomes completos
+    abreviacoes = {
+        "FLU": "Fluminense", "Fluminense": "Fluminense",
+        "GRE": "Grêmio", "Grêmio": "Grêmio", "Gremio": "Grêmio",
+        "BOT": "Botafogo", "Botafogo": "Botafogo",
+        "CRU": "Cruzeiro", "Cruzeiro": "Cruzeiro",
+        "SAO": "São Paulo", "São Paulo": "São Paulo", "Sao Paulo": "São Paulo",
+        "FLA": "Flamengo", "Flamengo": "Flamengo",
+        "COR": "Corinthians", "Corinthians": "Corinthians",
+        "BAH": "Bahia", "Bahia": "Bahia",
+        "MIR": "Mirassol", "Mirassol": "Mirassol",
+        "VAS": "Vasco", "Vasco": "Vasco",
+        "CAM": "Atlético-MG", "ATL": "Atlético-MG", "Atlético-MG": "Atlético-MG", 
+        "Atletico-MG": "Atlético-MG", "Atlético MG": "Atlético-MG",
+        "PAL": "Palmeiras", "Palmeiras": "Palmeiras",
+        "INT": "Internacional", "Internacional": "Internacional",
+        "CAP": "Athletico-PR", "Athletico-PR": "Athletico-PR", "Athletico PR": "Athletico-PR",
+        "CFC": "Coritiba", "Coritiba": "Coritiba",
+        "RBB": "Bragantino", "BRA": "Bragantino", "Bragantino": "Bragantino",
+        "VIT": "Vitória", "Vitória": "Vitória", "Vitoria": "Vitória",
+        "REM": "Remo", "Remo": "Remo",
+        "CHA": "Chapecoense", "Chapecoense": "Chapecoense",
+        "SAN": "Santos", "Santos": "Santos"
+    }
+    
+    apostas = []
+    
+    for jogo in jogos_rodada:
+        time1_orig = jogo.get("time1", "").strip()
+        time2_orig = jogo.get("time2", "").strip()
+        
+        if not time1_orig or not time2_orig:
+            continue
+        
+        # Normaliza nomes dos times
+        time1 = abreviacoes.get(time1_orig, time1_orig)
+        time2 = abreviacoes.get(time2_orig, time2_orig)
+        
+        # Se ainda não encontrou, tenta normalizar
+        if time1 == time1_orig:
+            for abrev, nome in abreviacoes.items():
+                if abrev.lower() in time1_orig.lower() or time1_orig.lower() in abrev.lower():
+                    time1 = nome
+                    break
+        
+        if time2 == time2_orig:
+            for abrev, nome in abreviacoes.items():
+                if abrev.lower() in time2_orig.lower() or time2_orig.lower() in abrev.lower():
+                    time2 = nome
+                    break
+        
+        # Pega os pontos de crédito
+        pontos_time1 = pontos_credito.get(time1, 0.0)
+        pontos_time2 = pontos_credito.get(time2, 0.0)
+        
+        # Calcula a diferença
+        diferenca = abs(pontos_time1 - pontos_time2)
+        
+        # Se a diferença for >= 2, adiciona o time com maior pontuação
+        if diferenca >= 2.0:
+            if pontos_time1 > pontos_time2:
+                apostas.append({
+                    "time": time1,
+                    "adversario": time2,
+                    "pontos": pontos_time1,
+                    "pontos_adv": pontos_time2,
+                    "diferenca": diferenca
+                })
+            else:
+                apostas.append({
+                    "time": time2,
+                    "adversario": time1,
+                    "pontos": pontos_time2,
+                    "pontos_adv": pontos_time1,
+                    "diferenca": diferenca
+                })
+    
+    # Ordena por diferença (maior primeiro)
+    apostas.sort(key=lambda x: x["diferenca"], reverse=True)
+    
+    return apostas
+
+def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resultados_h2h=None, apostas=None):
     html = '''<!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -298,6 +384,12 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
         .h2h-vitoria { background: #4CAF50 !important; color: #fff; font-weight: bold; }
         .h2h-empate { background: #9e9e9e !important; color: #fff; font-weight: bold; }
         .h2h-derrota { background: #f44336 !important; color: #fff; font-weight: bold; }
+        .bets-table { width: 100%; font-size: 0.85em; margin-top: 15px; border-collapse: collapse; }
+        .bets-table th { background: #FFD700; color: #000; padding: 8px 5px; font-size: 0.9em; font-weight: bold; }
+        .bets-table td { padding: 6px 5px; text-align: left; border-bottom: 1px solid #eee; }
+        .bets-table tr:hover { background: #f9f9f9; }
+        .bet-time { font-weight: bold; color: #d00; }
+        .bet-diferenca { color: #666; font-size: 0.85em; }
     </style>
 </head>
 <body>
@@ -437,7 +529,35 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
         html += f'            <tr class="{classe}"><td>{time}</td><td>{pontos:.2f}</td></tr>\n'
     
     html += '''        </table>
-    </div>
+'''
+    
+    # Adiciona tabela de BETs se houver apostas sugeridas
+    if apostas:
+        html += '''
+        <h3 style="margin-top: 20px; color: #d00;">BETs</h3>
+        <table class="bets-table">
+            <tr><th colspan="2">Apostas Recomendadas</th></tr>
+'''
+        
+        for aposta in apostas:
+            time = aposta["time"]
+            adversario = aposta["adversario"]
+            pontos = aposta["pontos"]
+            pontos_adv = aposta["pontos_adv"]
+            diferenca = aposta["diferenca"]
+            
+            html += f'''            <tr>
+                <td colspan="2">
+                    <span class="bet-time">{time}</span> vs {adversario}<br>
+                    <span class="bet-diferenca">Créditos: {pontos:.2f} x {pontos_adv:.2f} (Δ {diferenca:.2f})</span>
+                </td>
+            </tr>
+'''
+        
+        html += '''        </table>
+'''
+    
+    html += '''    </div>
 </body>
 </html>
 '''
@@ -613,7 +733,10 @@ def main():
             else:
                 pontos_credito[time] = pontos_h2h
     
-    html = gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resultados_h2h)
+    # Analisa apostas baseado nos créditos
+    apostas = analisar_apostas(jogos_rodada, pontos_credito)
+    
+    html = gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resultados_h2h, apostas)
     fname = "sofascore_result.html"
     with open(fname, "w", encoding="utf-8") as f:
         f.write(html)
