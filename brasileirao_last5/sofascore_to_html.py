@@ -307,6 +307,14 @@ def main():
     print("Buscando jogos do Bahia...")
     jogos_bahia = scrape_sofascore_last5(team_id=1955, team_name="Bahia", debug=False)
     
+    # Busca jogos do Vasco
+    print("Buscando jogos do Vasco...")
+    jogos_vasco = scrape_sofascore_last5(team_id=1974, team_name="Vasco", debug=False)
+    
+    # Busca jogos do Mirassol
+    print("Buscando jogos do Mirassol...")
+    jogos_mirassol = scrape_sofascore_last5(team_id=21982, team_name="Mirassol", debug=False)
+    
     # Gera HTML com ambos os times
     times_jogos = [
         ("Flamengo", jogos_flamengo),
@@ -316,7 +324,9 @@ def main():
         ("Botafogo", jogos_botafogo),
         ("Cruzeiro", jogos_cruzeiro),
         ("Corinthians", jogos_corinthians),
-        ("Bahia", jogos_bahia)
+        ("Bahia", jogos_bahia),
+        ("Vasco", jogos_vasco),
+        ("Mirassol", jogos_mirassol)
     ]
     
     # Calcula pontos de crédito
@@ -328,7 +338,9 @@ def main():
         "Botafogo": calcular_pontos_credito("Botafogo", jogos_botafogo),
         "Cruzeiro": calcular_pontos_credito("Cruzeiro", jogos_cruzeiro),
         "Corinthians": calcular_pontos_credito("Corinthians", jogos_corinthians),
-        "Bahia": calcular_pontos_credito("Bahia", jogos_bahia)
+        "Bahia": calcular_pontos_credito("Bahia", jogos_bahia),
+        "Vasco": calcular_pontos_credito("Vasco", jogos_vasco),
+        "Mirassol": calcular_pontos_credito("Mirassol", jogos_mirassol)
     }
     
     # Adiciona bônus de 0.5 pontos para times mandantes na próxima rodada
