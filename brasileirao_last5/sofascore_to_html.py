@@ -109,8 +109,16 @@ def carregar_dados_h2h():
 
 def processar_resultados_h2h(dados_h2h):
     """
-    Processa os dados H2H e retorna um dicionário com os resultados de cada time.
-    Formato: {"Time": ["V", "D", "E", "V", "D"]}
+    Processa os dados H2H e retorna um dicionário com os resultados e pontos de cada time.
+    Formato: {"Time": {"resultados": ["V", "D", "E", "V", "D"], "pontos": 0.5}}
+    
+    Pontuação:
+    - Vitória fora de casa: +0.2
+    - Vitória em casa: +0.1
+    - Empate fora de casa: +0.1
+    - Empate em casa: 0
+    - Derrota em casa: -0.2
+    - Derrota fora de casa: -0.1
     """
     resultados = {}
     
@@ -119,29 +127,100 @@ def processar_resultados_h2h(dados_h2h):
         time2 = confronto["time2"]
         h2h_list = confronto["h2h"]
         
-        # Inicializa listas de resultados se não existirem
+        # Inicializa dicionários de resultados se não existirem
         if time1 not in resultados:
-            resultados[time1] = []
+            resultados[time1] = {"resultados": [], "pontos": 0.0}
         if time2 not in resultados:
-            resultados[time2] = []
+            resultados[time2] = {"resultados": [], "pontos": 0.0}
         
         # Processa cada jogo H2H
         for jogo in h2h_list:
             texto = jogo["texto"]
             
-            # Extrai o resultado (V, E, D) do início do texto
-            if texto.startswith("V "):
-                # Vitória para o time1
-                resultados[time1].append("V")
-                resultados[time2].append("D")
-            elif texto.startswith("E "):
-                # Empate
-                resultados[time1].append("E")
-                resultados[time2].append("E")
-            elif texto.startswith("D "):
-                # Derrota para o time1
-                resultados[time1].append("D")
-                resultados[time2].append("V")
+            # Extrai informações do texto
+            # Formato: "V 2025-12-02 Time1 X-Y Time2 ..."
+            # Precisamos identificar qual time jogou em casa
+            
+            # Extrai resultado (V, E, D)
+            resultado_time1 = texto[0]  # Primeiro caractere (V, E ou D)
+            
+            # Identifica mandante e visitante no texto
+            # O formato geralmente é: "RESULTADO DATA MANDANTE PLACAR VISITANTE RESTO"
+            partes = texto.split()
+            
+            # Procura pelo placar (formato X-Y)
+            placar_idx = -1
+            for i, parte in enumerate(partes):
+                if '-' in parte and any(c.isdigit() for c in parte):
+                    placar_idx = i
+                    break
+            
+            if placar_idx > 0:
+                # O mandante está antes do placar, visitante depois
+                # Junta as palavras antes do placar para formar o nome do mandante
+                mandante_palavras = []
+                for i in range(2, placar_idx):  # Começa do índice 2 (depois de resultado e data)
+                    mandante_palavras.append(partes[i])
+                mandante_texto = " ".join(mandante_palavras)
+                
+                # Junta as palavras depois do placar para o visitante
+                visitante_palavras = []
+                for i in range(placar_idx + 1, len(partes)):
+                    palavra = partes[i]
+                    # Para quando encontrar indicadores de rodada/competição
+                    if palavra.startswith('R') or palavra.startswith('SF') or palavra.startswith('QF') or palavra.startswith('1/'):
+                        break
+                    visitante_palavras.append(palavra)
+                visitante_texto = " ".join(visitante_palavras)
+                
+                # Verifica se time1 é mandante ou visitante
+                time1_mandante = time1.lower() in mandante_texto.lower() or mandante_texto.lower() in time1.lower()
+                
+                # Calcula pontos baseado no resultado e mando de campo
+                if resultado_time1 == "V":
+                    # Vitória para time1
+                    if time1_mandante:
+                        # Vitória em casa
+                        resultados[time1]["resultados"].append("V")
+                        resultados[time1]["pontos"] += 0.1
+                        resultados[time2]["resultados"].append("D")
+                        resultados[time2]["pontos"] -= 0.1  # Derrota fora
+                    else:
+                        # Vitória fora
+                        resultados[time1]["resultados"].append("V")
+                        resultados[time1]["pontos"] += 0.2
+                        resultados[time2]["resultados"].append("D")
+                        resultados[time2]["pontos"] -= 0.2  # Derrota em casa
+                
+                elif resultado_time1 == "E":
+                    # Empate
+                    if time1_mandante:
+                        # Empate em casa
+                        resultados[time1]["resultados"].append("E")
+                        resultados[time1]["pontos"] += 0.0
+                        resultados[time2]["resultados"].append("E")
+                        resultados[time2]["pontos"] += 0.1  # Empate fora
+                    else:
+                        # Empate fora
+                        resultados[time1]["resultados"].append("E")
+                        resultados[time1]["pontos"] += 0.1
+                        resultados[time2]["resultados"].append("E")
+                        resultados[time2]["pontos"] += 0.0  # Empate em casa
+                
+                elif resultado_time1 == "D":
+                    # Derrota para time1
+                    if time1_mandante:
+                        # Derrota em casa
+                        resultados[time1]["resultados"].append("D")
+                        resultados[time1]["pontos"] -= 0.2
+                        resultados[time2]["resultados"].append("V")
+                        resultados[time2]["pontos"] += 0.2  # Vitória fora
+                    else:
+                        # Derrota fora
+                        resultados[time1]["resultados"].append("D")
+                        resultados[time1]["pontos"] -= 0.1
+                        resultados[time2]["resultados"].append("V")
+                        resultados[time2]["pontos"] += 0.1  # Vitória em casa
     
     return resultados
 
@@ -250,14 +329,16 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
         html += '''
         <h3 style="margin-top: 20px;">Créditos confronto direto</h3>
         <table class="h2h-table">
-            <tr><th>Time</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>
+            <tr><th>Time</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Pts</th></tr>
 '''
         
         # Ordena times alfabeticamente
         times_ordenados = sorted(resultados_h2h.keys())
         
         for time in times_ordenados:
-            resultados = resultados_h2h[time]
+            dados_time = resultados_h2h[time]
+            resultados = dados_time["resultados"]
+            pontos = dados_time["pontos"]
             html += f'            <tr><td>{time}</td>'
             
             # Adiciona até 5 resultados (preenche com "-" se não houver)
@@ -275,6 +356,8 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
                 else:
                     html += '<td>-</td>'
             
+            # Adiciona coluna de pontos
+            html += f'<td style="font-weight: bold; background: #FFE4B5;">{pontos:.1f}</td>'
             html += '</tr>\n'
         
         html += '''        </table>
@@ -520,6 +603,15 @@ def main():
     print("Carregando dados de confrontos diretos (H2H)...")
     dados_h2h = carregar_dados_h2h()
     resultados_h2h = processar_resultados_h2h(dados_h2h) if dados_h2h else None
+    
+    # Adiciona pontos H2H aos pontos de crédito totais
+    if resultados_h2h:
+        for time, dados in resultados_h2h.items():
+            pontos_h2h = dados["pontos"]
+            if time in pontos_credito:
+                pontos_credito[time] += pontos_h2h
+            else:
+                pontos_credito[time] = pontos_h2h
     
     html = gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resultados_h2h)
     fname = "sofascore_result.html"
