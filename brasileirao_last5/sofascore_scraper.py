@@ -65,13 +65,13 @@ def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", deb
                 const candidate = allElements[j];
                 const cText = (candidate.innerText || '').trim();
                 
-                // Para se encontrar outro campeonato (adicionado Carioca)
-                if (/carioca|libertadores|sul-americana|intercontinental|fifa|amistoso/i.test(cText) && cText.length < 100) break;
+                // Para se encontrar outro campeonato (adicionado Carioca e Copa do Brasil)
+                if (/carioca|libertadores|sul-americana|intercontinental|fifa|amistoso|copa.*brasil/i.test(cText) && cText.length < 100) break;
                 
                 // Se parecer um bloco de jogo (tem data + time + números)
-                // E NÃO contém "Carioca" no texto
+                // E NÃO contém "Carioca" ou "Copa do Brasil" no texto
                 if (/\d{2}\/\d{2}\/\d{2}/.test(cText) && 
-                    !/carioca/i.test(cText) &&
+                    !/carioca|copa.*brasil/i.test(cText) &&
                     cText.length > 20 && cText.length < 300) {
                     const dateMatch = cText.match(/(\d{2}\/\d{2}\/\d{2,4})/);
                     const scoreMatch = cText.match(/(\d+)\s*[x:–\-]\s*(\d+)/i);
@@ -100,9 +100,9 @@ def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", deb
             except Exception:
                 continue
         
-        # DEPOIS: Clica na seta esquerda DUAS VEZES para carregar mais jogos antigos (se habilitado)
+        # DEPOIS: Clica na seta esquerda UMA VEZ para carregar mais jogos antigos (se habilitado)
         if click_navigation:
-            for click_num in range(2):
+            for click_num in range(1):  # Máximo 1 clique
                 try:
                     clicked = page.evaluate("""
                         (() => {
@@ -302,6 +302,14 @@ def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", deb
         def is_serie_a(nome):
             nome_norm = normalize_nome(nome)
             return any(clube in nome_norm for clube in serie_a_norm)
+        
+        # Verifica se o texto contém indicadores de outros campeonatos
+        texto_completo = txt.lower()
+        if any(campeonato in texto_completo for campeonato in ["carioca", "paulista", "paulistão", "mineiro", "gaucho", "gaúcho", "copa betano do brasil", "copa do brasil"]):
+            if debug:
+                print(f"Descartado: jogo de campeonato estadual/Copa do Brasil detectado")
+            continue
+        
         if (
             home.get("name", "-") != "-" and
             away.get("name", "-") != "-" and
