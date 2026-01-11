@@ -347,6 +347,10 @@ def main():
     print("Buscando jogos do Chapecoense...")
     jogos_chapecoense = scrape_sofascore_last5(team_id=21845, team_name="Chapecoense", debug=False)
     
+    # Busca jogos do Coritiba
+    print("Buscando jogos do Coritiba...")
+    jogos_coritiba = scrape_sofascore_last5(team_id=1982, team_name="Coritiba", debug=False)
+    
     # Gera HTML com ambos os times
     times_jogos = [
         ("Flamengo", jogos_flamengo),
@@ -366,7 +370,8 @@ def main():
         ("Vitória", jogos_vitoria),
         ("Santos", jogos_santos),
         ("Remo", jogos_remo),
-        ("Chapecoense", jogos_chapecoense)
+        ("Chapecoense", jogos_chapecoense),
+        ("Coritiba", jogos_coritiba)
     ]
     
     # Calcula pontos de crédito
@@ -388,7 +393,8 @@ def main():
         "Vitória": calcular_pontos_credito("Vitória", jogos_vitoria),
         "Santos": calcular_pontos_credito("Santos", jogos_santos),
         "Remo": calcular_pontos_credito("Remo", jogos_remo),
-        "Chapecoense": calcular_pontos_credito("Chapecoense", jogos_chapecoense)
+        "Chapecoense": calcular_pontos_credito("Chapecoense", jogos_chapecoense),
+        "Coritiba": calcular_pontos_credito("Coritiba", jogos_coritiba)
     }
     
     # Adiciona bônus de 0.5 pontos para times mandantes na próxima rodada
