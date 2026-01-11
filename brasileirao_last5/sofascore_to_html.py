@@ -270,30 +270,30 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
     <meta charset="UTF-8">
     <title>Últimos 5 jogos - Brasileirão Betano</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f7f7f7; display: flex; }
-        .sidebar { width: 250px; padding: 15px; background: #fff; box-shadow: 2px 0 8px #0001; font-size: 0.9em; }
+        body { font-family: Arial, sans-serif; background: #f7f7f7; display: flex; margin: 0; padding: 0; }
+        .sidebar { width: 220px; padding: 10px; background: #fff; box-shadow: 2px 0 8px #0001; font-size: 0.75em; }
         .main-content { flex: 1; padding: 8px; display: flex; flex-wrap: wrap; justify-content: space-around; }
         .sidebar-right { width: 250px; padding: 15px; background: #fff; box-shadow: -2px 0 8px #0001; font-size: 0.9em; }
         .time-section { width: 18%; min-width: 180px; margin: 5px; }
         h1 { color: #333; text-align: center; font-size: 0.9em; margin: 5px 0; width: 100%; }
         h2 { color: #d00; text-align: center; margin: 8px 0 5px 0; font-size: 0.75em; }
-        h3 { color: #333; font-size: 1.0em; margin: 12px 0; }
+        h3 { color: #333; font-size: 0.9em; margin: 8px 0 4px 0; }
         table { border-collapse: collapse; margin: 5px auto; background: #fff; box-shadow: 0 1px 4px #0001; font-size: 0.65em; width: 100%; }
         th, td { padding: 3px 5px; border: 1px solid #ccc; text-align: center; font-size: 0.85em; }
         th { background: #87CEEB; color: #000; }
         .vitoria { background: #4CAF50 !important; color: #fff; }
         .derrota { background: #f44336 !important; color: #fff; }
         .empate { background: #9e9e9e !important; color: #fff; }
-        .jogo-rodada { font-size: 0.85em; padding: 5px; border-bottom: 1px solid #eee; }
+        .jogo-rodada { font-size: 0.75em; padding: 3px 2px; border-bottom: 1px solid #eee; line-height: 1.3; }
         .jogo-rodada:last-child { border-bottom: none; }
         .times-table { width: 100%; font-size: 0.85em; }
         .times-table td { text-align: left; padding: 5px 8px; }
         .times-table td:last-child { text-align: center; font-weight: bold; }
         .top3 { background: #FFD700 !important; }
         .negativo { background: #ff6b6b !important; color: #fff; }
-        .h2h-table { width: 100%; font-size: 0.75em; margin-top: 10px; }
-        .h2h-table th { background: #87CEEB; color: #000; padding: 4px 2px; font-size: 0.8em; }
-        .h2h-table td { padding: 3px 2px; text-align: center; }
+        .h2h-table { width: 100%; font-size: 0.68em; margin-top: 5px; }
+        .h2h-table th { background: #87CEEB; color: #000; padding: 2px 1px; font-size: 0.8em; }
+        .h2h-table td { padding: 2px 1px; text-align: center; }
         .h2h-table td:first-child { text-align: left; padding-left: 5px; }
         .h2h-vitoria { background: #4CAF50 !important; color: #fff; font-weight: bold; }
         .h2h-empate { background: #9e9e9e !important; color: #fff; font-weight: bold; }
@@ -309,9 +309,9 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
         html += f'        <div class="jogo-rodada">{jogo["data"]} - {jogo["time1"]} x {jogo["time2"]}</div>\n'
     
     html += '''
-        <h3 style="margin-top: 20px;">Classificação</h3>
-        <table style="width: 100%; font-size: 0.75em;">
-            <tr><th style="padding: 3px;">Pos</th><th>Time</th><th>Pts</th><th>J</th></tr>
+        <h3 style="margin-top: 12px;">Classificação</h3>
+        <table style="width: 100%; font-size: 0.7em;">
+            <tr><th style="padding: 2px;">Pos</th><th>Time</th><th>Pts</th><th>J</th></tr>
 '''
     
     for item in classificacao:
@@ -319,7 +319,7 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
         time = item.get("time", "")
         pts = item.get("pontos", "0")
         jogos = item.get("jogos", "0")
-        html += f'            <tr><td style="text-align: center; padding: 2px;">{pos}</td><td style="text-align: left; padding: 2px;">{time}</td><td style="text-align: center; padding: 2px;">{pts}</td><td style="text-align: center; padding: 2px;">{jogos}</td></tr>\n'
+        html += f'            <tr><td style="text-align: center; padding: 1px 2px;">{pos}</td><td style="text-align: left; padding: 1px 2px;">{time}</td><td style="text-align: center; padding: 1px 2px;">{pts}</td><td style="text-align: center; padding: 1px 2px;">{jogos}</td></tr>\n'
     
     html += '''        </table>
 '''
@@ -327,7 +327,7 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
     # Adiciona tabela de Créditos Confronto Direto
     if resultados_h2h:
         html += '''
-        <h3 style="margin-top: 20px;">Créditos confronto direto</h3>
+        <h3 style="margin-top: 10px;">Créditos confronto direto</h3>
         <table class="h2h-table">
             <tr><th>Time</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Pts</th></tr>
 '''
