@@ -379,6 +379,9 @@ def main():
         ("Athletico-PR", jogos_athletico_pr)
     ]
     
+    # Ordena times alfabeticamente
+    times_jogos = sorted(times_jogos, key=lambda x: x[0])
+    
     # Calcula pontos de crédito
     pontos_credito = {
         "Flamengo": calcular_pontos_credito("Flamengo", jogos_flamengo),
