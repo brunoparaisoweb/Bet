@@ -65,13 +65,13 @@ def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", deb
                 const candidate = allElements[j];
                 const cText = (candidate.innerText || '').trim();
                 
-                // Para se encontrar outro campeonato (adicionado Carioca e Copa do Brasil)
-                if (/carioca|libertadores|sul-americana|intercontinental|fifa|amistoso|copa.*brasil/i.test(cText) && cText.length < 100) break;
+                // Para se encontrar outro campeonato (adicionado Carioca, Copa do Brasil e Série B)
+                if (/carioca|libertadores|sul-americana|intercontinental|fifa|amistoso|copa.*brasil|s[ée]rie\s*b/i.test(cText) && cText.length < 100) break;
                 
                 // Se parecer um bloco de jogo (tem data + time + números)
-                // E NÃO contém "Carioca" ou "Copa do Brasil" no texto
+                // E NÃO contém "Carioca", "Copa do Brasil" ou "Série B" no texto
                 if (/\d{2}\/\d{2}\/\d{2}/.test(cText) && 
-                    !/carioca|copa.*brasil/i.test(cText) &&
+                    !/carioca|copa.*brasil|s[ée]rie\s*b/i.test(cText) &&
                     cText.length > 20 && cText.length < 300) {
                     const dateMatch = cText.match(/(\d{2}\/\d{2}\/\d{2,4})/);
                     const scoreMatch = cText.match(/(\d+)\s*[x:–\-]\s*(\d+)/i);
@@ -305,9 +305,9 @@ def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", deb
         
         # Verifica se o texto contém indicadores de outros campeonatos
         texto_completo = txt.lower()
-        if any(campeonato in texto_completo for campeonato in ["carioca", "paulista", "paulistão", "mineiro", "gaucho", "gaúcho", "copa betano do brasil", "copa do brasil"]):
+        if any(campeonato in texto_completo for campeonato in ["carioca", "paulista", "paulistão", "mineiro", "gaucho", "gaúcho", "copa betano do brasil", "copa do brasil", "série b", "serie b"]):
             if debug:
-                print(f"Descartado: jogo de campeonato estadual/Copa do Brasil detectado")
+                print(f"Descartado: jogo de campeonato estadual/Copa do Brasil/Série B detectado")
             continue
         
         if (
