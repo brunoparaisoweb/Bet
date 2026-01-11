@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Gera HTML com histórico H2H usando ogol.com.br"""
 
+import json
 from ge_scraper import scrape_primeira_rodada
 from ogol_scraper import scrape_h2h_ogol
 
@@ -183,7 +184,12 @@ def gerar_html_h2h_ogol():
     with open("h2h_rodada_ogol.html", "w", encoding="utf-8") as f:
         f.write(html)
     
+    # Salva os dados em JSON para uso posterior
+    with open("h2h_data.json", "w", encoding="utf-8") as f:
+        json.dump(confrontos_h2h, f, ensure_ascii=False, indent=2)
+    
     print(f"\n[OK] HTML gerado: h2h_rodada_ogol.html")
+    print(f"[OK] Dados JSON salvos: h2h_data.json")
     print(f"  Total de confrontos: {len(confrontos_h2h)}")
     print(f"  Confrontos com H2H: {sum(1 for c in confrontos_h2h if c['h2h'])}")
     print(f"  Confrontos sem H2H: {sum(1 for c in confrontos_h2h if not c['h2h'])}")

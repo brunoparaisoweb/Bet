@@ -1,0 +1,203 @@
+[
+  {
+    "time1": "Fluminense",
+    "time2": "Grêmio",
+    "h2h": [
+      {
+        "texto": "V 2025-12-02 Grêmio 1-2 Fluminense R37 Brasileirão 2025"
+      },
+      {
+        "texto": "V 2025-08-02 Fluminense 1-0 Grêmio R18 Brasileirão 2025"
+      },
+      {
+        "texto": "E 2024-11-01 Fluminense 2-2 Grêmio R32 Brasileirão 2024"
+      },
+      {
+        "texto": "V 2024-08-20 Fluminense 2-1\n(4-2 Pen.) Grêmio 1/8 Copa Libertadores 2024"
+      },
+      {
+        "texto": "D 2024-08-13 Grêmio 2-1 Fluminense 1/8 Copa Libertadores 2024"
+      }
+    ]
+  },
+  {
+    "time1": "Botafogo",
+    "time2": "Cruzeiro",
+    "h2h": [
+      {
+        "texto": "E 2025-12-04 Cruzeiro 2-2 Botafogo R37 Brasileirão 2025"
+      },
+      {
+        "texto": "D 2025-08-03 Botafogo 0-2 Cruzeiro R18 Brasileirão 2025"
+      },
+      {
+        "texto": "D 2024-07-27 Botafogo 0-3 Cruzeiro R20 Brasileirão 2024"
+      },
+      {
+        "texto": "D 2024-04-14 Cruzeiro 3-2 Botafogo R1 Brasileirão 2024"
+      },
+      {
+        "texto": "E 2023-12-03 Botafogo 0-0 Cruzeiro R37 Brasileirão 2023"
+      }
+    ]
+  },
+  {
+    "time1": "São Paulo",
+    "time2": "Flamengo",
+    "h2h": [
+      {
+        "texto": "E 2025-11-05 São Paulo 2-2 Flamengo R32 Brasileirão 2025"
+      },
+      {
+        "texto": "D 2025-07-12 Flamengo 2-0 São Paulo R13 Brasileirão 2025"
+      },
+      {
+        "texto": "V 2024-08-03 São Paulo 1-0 Flamengo R21 Brasileirão 2024"
+      },
+      {
+        "texto": "D 2024-04-17 Flamengo 2-1 São Paulo R2 Brasileirão 2024"
+      },
+      {
+        "texto": "V 2023-12-06 São Paulo 1-0 Flamengo R38 Brasileirão 2023"
+      }
+    ]
+  },
+  {
+    "time1": "Corinthians",
+    "time2": "Bahia",
+    "h2h": [
+      {
+        "texto": "D 2025-08-16 Corinthians 1-2 Bahia R20 Brasileirão 2025"
+      },
+      {
+        "texto": "E 2025-03-30 Bahia 1-1 Corinthians R1 Brasileirão 2025"
+      },
+      {
+        "texto": "V 2024-12-03 Corinthians 3-0 Bahia R37 Brasileirão 2024"
+      },
+      {
+        "texto": "V 2024-07-21 Bahia 0-1 Corinthians R18 Brasileirão 2024"
+      },
+      {
+        "texto": "D 2023-11-24 Corinthians 1-5 Bahia R35 Brasileirão 2023"
+      }
+    ]
+  },
+  {
+    "time1": "Mirassol",
+    "time2": "Vasco",
+    "h2h": [
+      {
+        "texto": "V 2025-12-02 Vasco 0-2 Mirassol R37 Brasileirão 2025"
+      },
+      {
+        "texto": "V 2025-08-02 Mirassol 3-2 Vasco R18 Brasileirão 2025"
+      }
+    ]
+  },
+  {
+    "time1": "Atlético-MG",
+    "time2": "Palmeiras",
+    "h2h": [
+      {
+        "texto": "D 2025-12-03 Atlético Mineiro 0-3 Palmeiras R34 Brasileirão 2025"
+      },
+      {
+        "texto": "D 2025-07-20 Palmeiras 3-2 Atlético Mineiro R15 Brasileirão 2025"
+      },
+      {
+        "texto": "D 2024-09-28 Palmeiras 2-1 Atlético Mineiro R28 Brasileirão 2024"
+      },
+      {
+        "texto": "D 2024-06-17 Atlético Mineiro 0-4 Palmeiras R9 Brasileirão 2024"
+      },
+      {
+        "texto": "V 2023-10-19 Palmeiras 0-2 Atlético Mineiro R27 Brasileirão 2023"
+      }
+    ]
+  },
+  {
+    "time1": "Internacional",
+    "time2": "Athletico-PR",
+    "h2h": [
+      {
+        "texto": "E 2024-08-11 Internacional 2-2 Athletico Paranaense R22 Brasileirão 2024"
+      },
+      {
+        "texto": "D 2024-04-21 Athletico Paranaense 1-0 Internacional R3 Brasileirão 2024"
+      },
+      {
+        "texto": "D 2023-09-21 Athletico Paranaense 2-1 Internacional R24 Brasileirão 2023"
+      },
+      {
+        "texto": "D 2023-05-10 Internacional 0-2 Athletico Paranaense R5 Brasileirão 2023"
+      },
+      {
+        "texto": "V 2022-11-05 Internacional 2-0 Athletico Paranaense R36 Brasileirão 2022"
+      }
+    ]
+  },
+  {
+    "time1": "Coritiba",
+    "time2": "Bragantino",
+    "h2h": [
+      {
+        "texto": "D 2023-12-03 Red Bull Bragantino 1-0 Coritiba R37 Brasileirão 2023"
+      },
+      {
+        "texto": "D 2023-08-06 Coritiba 0-1 Red Bull Bragantino R18 Brasileirão 2023"
+      },
+      {
+        "texto": "V 2022-10-09 Coritiba 2-1 Red Bull Bragantino R31 Brasileirão 2022"
+      },
+      {
+        "texto": "D 2022-06-15 Red Bull Bragantino 4-2 Coritiba R12 Brasileirão 2022"
+      },
+      {
+        "texto": "E 2020-12-05 Coritiba 0-0 Red Bull Bragantino R24 Brasileirão 2020"
+      }
+    ]
+  },
+  {
+    "time1": "Vitória",
+    "time2": "Remo",
+    "h2h": [
+      {
+        "texto": "D 2022-04-09 Remo 2-1 Vitória R1 Série C 2022"
+      },
+      {
+        "texto": "D 2021-09-10 Vitória 1-2 Remo R23 Série B 2021"
+      },
+      {
+        "texto": "E 2021-06-16 Remo 0-0 Vitória R4 Série B 2021"
+      },
+      {
+        "texto": "E 2007-11-17 Vitória 1-1 Remo R37 Série B 2007"
+      },
+      {
+        "texto": "V 2007-08-11 Remo 1-2 Vitória R18 Série B 2007"
+      }
+    ]
+  },
+  {
+    "time1": "Chapecoense",
+    "time2": "Santos",
+    "h2h": [
+      {
+        "texto": "V 2024-10-16 Chapecoense 3-2 Santos R32 Série B 2024"
+      },
+      {
+        "texto": "D 2024-07-01 Santos 1-0 Chapecoense R13 Série B 2024"
+      },
+      {
+        "texto": "D 2021-11-17 Santos 2-0 Chapecoense R33 Brasileirão 2021"
+      },
+      {
+        "texto": "D 2021-08-01 Chapecoense 0-1 Santos R14 Brasileirão 2021"
+      },
+      {
+        "texto": "D 2019-12-01 Santos 2-0 Chapecoense R36 Brasileirão 2019"
+      }
+    ]
+  }
+]

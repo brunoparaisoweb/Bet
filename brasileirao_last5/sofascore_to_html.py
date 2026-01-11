@@ -5,6 +5,8 @@ Requer: sofascore_scraper.py no mesmo diretório.
 """
 import subprocess
 import webbrowser
+import json
+import os
 from sofascore_scraper import scrape_sofascore_last5
 from ge_scraper import scrape_primeira_rodada, scrape_classificacao
 
@@ -96,6 +98,53 @@ def calcular_bonus_mandante(jogos_rodada):
             bonus[nome_completo] = bonus.get(nome_completo, 0) + 0.5
     return bonus
 
+def carregar_dados_h2h():
+    """Carrega dados H2H do arquivo JSON gerado pelo gerar_h2h_ogol.py"""
+    try:
+        with open("h2h_data.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print("Aviso: Arquivo h2h_data.json não encontrado. Execute gerar_h2h_ogol.py primeiro.")
+        return []
+
+def processar_resultados_h2h(dados_h2h):
+    """
+    Processa os dados H2H e retorna um dicionário com os resultados de cada time.
+    Formato: {"Time": ["V", "D", "E", "V", "D"]}
+    """
+    resultados = {}
+    
+    for confronto in dados_h2h:
+        time1 = confronto["time1"]
+        time2 = confronto["time2"]
+        h2h_list = confronto["h2h"]
+        
+        # Inicializa listas de resultados se não existirem
+        if time1 not in resultados:
+            resultados[time1] = []
+        if time2 not in resultados:
+            resultados[time2] = []
+        
+        # Processa cada jogo H2H
+        for jogo in h2h_list:
+            texto = jogo["texto"]
+            
+            # Extrai o resultado (V, E, D) do início do texto
+            if texto.startswith("V "):
+                # Vitória para o time1
+                resultados[time1].append("V")
+                resultados[time2].append("D")
+            elif texto.startswith("E "):
+                # Empate
+                resultados[time1].append("E")
+                resultados[time2].append("E")
+            elif texto.startswith("D "):
+                # Derrota para o time1
+                resultados[time1].append("D")
+                resultados[time2].append("V")
+    
+    return resultados
+
 def calcular_bonus_classificacao(classificacao):
     """Adiciona pontos de crédito baseado na posição na classificação do campeonato."""
     bonus = {}
@@ -135,7 +184,7 @@ def calcular_bonus_classificacao(classificacao):
     
     return bonus
 
-def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito):
+def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resultados_h2h=None):
     html = '''<!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -163,6 +212,13 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito):
         .times-table td:last-child { text-align: center; font-weight: bold; }
         .top3 { background: #FFD700 !important; }
         .negativo { background: #ff6b6b !important; color: #fff; }
+        .h2h-table { width: 100%; font-size: 0.75em; margin-top: 10px; }
+        .h2h-table th { background: #87CEEB; color: #000; padding: 4px 2px; font-size: 0.8em; }
+        .h2h-table td { padding: 3px 2px; text-align: center; }
+        .h2h-table td:first-child { text-align: left; padding-left: 5px; }
+        .h2h-vitoria { background: #4CAF50 !important; color: #fff; font-weight: bold; }
+        .h2h-empate { background: #9e9e9e !important; color: #fff; font-weight: bold; }
+        .h2h-derrota { background: #f44336 !important; color: #fff; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -187,6 +243,44 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito):
         html += f'            <tr><td style="text-align: center; padding: 2px;">{pos}</td><td style="text-align: left; padding: 2px;">{time}</td><td style="text-align: center; padding: 2px;">{pts}</td><td style="text-align: center; padding: 2px;">{jogos}</td></tr>\n'
     
     html += '''        </table>
+'''
+    
+    # Adiciona tabela de Créditos Confronto Direto
+    if resultados_h2h:
+        html += '''
+        <h3 style="margin-top: 20px;">Créditos confronto direto</h3>
+        <table class="h2h-table">
+            <tr><th>Time</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>
+'''
+        
+        # Ordena times alfabeticamente
+        times_ordenados = sorted(resultados_h2h.keys())
+        
+        for time in times_ordenados:
+            resultados = resultados_h2h[time]
+            html += f'            <tr><td>{time}</td>'
+            
+            # Adiciona até 5 resultados (preenche com "-" se não houver)
+            for i in range(5):
+                if i < len(resultados):
+                    resultado = resultados[i]
+                    classe = ""
+                    if resultado == "V":
+                        classe = "h2h-vitoria"
+                    elif resultado == "E":
+                        classe = "h2h-empate"
+                    elif resultado == "D":
+                        classe = "h2h-derrota"
+                    html += f'<td class="{classe}">{resultado}</td>'
+                else:
+                    html += '<td>-</td>'
+            
+            html += '</tr>\n'
+        
+        html += '''        </table>
+'''
+    
+    html += '''
     </div>
     <div class="main-content">
         <h1>Últimos 5 jogos<br><small>Brasileirão Betano</small></h1>
@@ -422,7 +516,12 @@ def main():
         else:
             pontos_credito[time] = bonus
     
-    html = gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito)
+    # Carrega e processa dados H2H
+    print("Carregando dados de confrontos diretos (H2H)...")
+    dados_h2h = carregar_dados_h2h()
+    resultados_h2h = processar_resultados_h2h(dados_h2h) if dados_h2h else None
+    
+    html = gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resultados_h2h)
     fname = "sofascore_result.html"
     with open(fname, "w", encoding="utf-8") as f:
         f.write(html)
