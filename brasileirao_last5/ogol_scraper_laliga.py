@@ -22,7 +22,7 @@ OGOL_TEAM_IDS = {
     "Athletic Club": 38,
     "Athletic Bilbao": 38,
     "Elche": 2548,
-    "Rayo Vallecano": 2818,
+    "Rayo Vallecano": 48,
     "Real Sociedad": 51,
     "Getafe": 3753,
     "Girona": 5121,
