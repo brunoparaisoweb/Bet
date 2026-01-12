@@ -320,7 +320,7 @@ def gerar_html_premier_league():
     with open("premier_league_analysis.html", "w", encoding="utf-8") as f:
         f.write(html)
     
-    print("\n✓ HTML gerado: premier_league_analysis.html")
+    print("\n[OK] HTML gerado: premier_league_analysis.html")
     return html
 
 def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
@@ -694,22 +694,15 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
             <tr><th>Time</th><th>Créditos Totais</th></tr>
 """
     
-    # Separa times em dois grupos: com H2H (próxima rodada) e sem H2H
-    times_com_h2h = []
-    times_sem_h2h = []
-    
+    # Cria lista única com todos os times e seus créditos (totais se tiver H2H, senão gerais)
+    times_ordenados = []
     for team_name, dados in dados_times.items():
-        if "creditos_totais" in dados:
-            times_com_h2h.append((team_name, dados["creditos_totais"]))
-        else:
-            times_sem_h2h.append((team_name, dados["creditos"]))
+        # Usa creditos_totais se disponível (times da próxima rodada), senão usa creditos gerais
+        creditos = dados.get("creditos_totais", dados.get("creditos", 0))
+        times_ordenados.append((team_name, creditos))
     
-    # Ordena ambos os grupos por créditos (do maior para o menor)
-    times_com_h2h.sort(key=lambda x: x[1], reverse=True)
-    times_sem_h2h.sort(key=lambda x: x[1], reverse=True)
-    
-    # Combina: primeiro os times com H2H (da próxima rodada), depois os outros
-    times_ordenados = times_com_h2h + times_sem_h2h
+    # Ordena todos os times por créditos (do maior para o menor)
+    times_ordenados.sort(key=lambda x: x[1], reverse=True)
     
     for idx, (team_name, creditos) in enumerate(times_ordenados):
         # Define a classe CSS: top3 para os 3 primeiros, negativo para negativos
