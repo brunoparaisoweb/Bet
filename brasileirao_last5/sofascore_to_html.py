@@ -356,7 +356,7 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
     <meta charset="UTF-8">
     <title>Últimos 5 jogos - Brasileirão Betano</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f7f7f7; display: flex; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #f7f7f7; display: flex; margin: 0; padding: 0 0 20px 0; }
         .sidebar { width: 220px; padding: 10px; background: #fff; box-shadow: 2px 0 8px #0001; font-size: 0.75em; }
         .main-content { flex: 1; padding: 8px; display: flex; flex-wrap: wrap; justify-content: space-around; }
         .sidebar-right { width: 250px; padding: 15px; background: #fff; box-shadow: -2px 0 8px #0001; font-size: 0.9em; }
@@ -390,6 +390,18 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
         .bets-table tr:hover { background: #f9f9f9; }
         .bet-time { font-weight: bold; color: #d00; }
         .bet-diferenca { color: #666; font-size: 0.85em; }
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #87CEEB;
+            color: #000;
+            text-align: center;
+            padding: 4px 0;
+            font-size: 9px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -558,6 +570,7 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
 '''
     
     html += '''    </div>
+    <footer>Development for Bruno Paraiso - 2026 | Todos os direitos reservados</footer>
 </body>
 </html>
 '''

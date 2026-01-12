@@ -338,7 +338,7 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 0 0 20px 0;
             background: #f7f7f7;
             display: flex;
         }
@@ -362,6 +362,18 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
             background: #fff;
             box-shadow: -2px 0 8px #0001;
             font-size: 0.9em;
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #37003c;
+            color: #fff;
+            text-align: center;
+            padding: 4px 0;
+            font-size: 9px;
+            z-index: 1000;
         }
         .time-section {
             width: 18%;
@@ -743,6 +755,7 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
 """
     
     html += """    </div>
+    <footer>Development for Bruno Paraiso - 2026 | Todos os direitos reservados</footer>
 </body>
 </html>
 """
