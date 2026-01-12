@@ -567,15 +567,10 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
             home_score = score.get("homeTeam", 0)
             away_score = score.get("awayTeam", 0)
             
-            # Data do jogo (formato: YYYY-MM-DD -> DD/MM/YY)
-            date_str = jogo.get("date", "")
+            # Data do jogo (formato já vem como DD/MM/YY do scraper)
+            date_str = jogo.get("startDate", "")
             if date_str:
-                try:
-                    from datetime import datetime
-                    date_obj = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
-                    date_formatted = date_obj.strftime("%d/%m/%y")
-                except:
-                    date_formatted = date_str[:10]
+                date_formatted = date_str
             else:
                 date_formatted = "N/A"
             
