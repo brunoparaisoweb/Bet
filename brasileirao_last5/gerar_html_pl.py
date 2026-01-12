@@ -7,6 +7,7 @@ import json
 from datetime import datetime
 from sofascore_scraper_pl import scrape_sofascore_last5, PREMIER_LEAGUE_TEAM_IDS
 from config_pl import PROXIMA_RODADA, CLASSIFICACAO_ATUAL
+from ogol_scraper_pl import scrape_h2h_ogol
 
 def calcular_creditos_time(team_name, ultimos_jogos, classificacao, h2h_data=None):
     """
@@ -164,6 +165,40 @@ def calcular_pontos_h2h(resultados):
     # Subtrai 1.5 (que seria a média teórica de 50% vitórias)
     return round(media - 1.5, 1)
 
+def extrair_h2h_confronto_direto(time_mandante, time_visitante, debug=False):
+    """
+    Extrai os últimos 5 jogos entre dois times específicos (confronto direto).
+    Retorna lista de resultados do ponto de vista do time mandante:
+    'V' (vitória), 'E' (empate), 'D' (derrota)
+    """
+    resultados = []
+    
+    # Busca confrontos diretos no ogol.com.br
+    jogos_h2h = scrape_h2h_ogol(time_mandante, time_visitante, debug=debug)
+    
+    if debug:
+        print(f"  Confronto {time_mandante} vs {time_visitante}: {len(jogos_h2h)} jogos encontrados")
+    
+    for jogo in jogos_h2h[:5]:  # Até 5 jogos
+        resultado = jogo.get("resultado", "").strip().upper()
+        
+        # Resultado já vem do ponto de vista do time_mandante (primeiro parâmetro da busca)
+        if resultado == 'V':
+            resultados.append('V')
+        elif resultado == 'E':
+            resultados.append('E')
+        elif resultado == 'D':
+            resultados.append('D')
+        else:
+            # Se não conseguir determinar, marca como '-'
+            resultados.append('-')
+    
+    # Preenche com '-' se não tiver 5 jogos
+    while len(resultados) < 5:
+        resultados.append('-')
+    
+    return resultados[:5]
+
 def gerar_html_premier_league():
     """
     Gera o HTML principal com análise da Premier League
@@ -199,16 +234,54 @@ def gerar_html_premier_league():
         dados_times[team_name]["creditos"] = creditos
         print(f"   {team_name}: {creditos} créditos")
     
-    # 3. Calcular dados H2H (últimos 5 jogos)
-    print("\n4. Calculando dados H2H...")
+    # 3. Calcular dados H2H (confrontos diretos da próxima rodada)
+    print("\n4. Calculando H2H dos confrontos diretos da próxima rodada...")
     h2h_dados = {}
-    for team_name in dados_times:
-        resultados = extrair_resultados_ultimos5(team_name, dados_times[team_name]["ultimos_jogos"])
-        pontos_h2h = calcular_pontos_h2h(resultados)
-        h2h_dados[team_name] = {
-            "resultados": resultados,
-            "pontos": pontos_h2h
+    
+    for jogo in PROXIMA_RODADA:
+        home = jogo["time1"]
+        away = jogo["time2"]
+        
+        print(f"   - Buscando H2H: {home} vs {away}")
+        
+        # Busca confrontos diretos entre os dois times
+        resultados_home = extrair_h2h_confronto_direto(home, away, debug=False)
+        pontos_h2h_home = calcular_pontos_h2h(resultados_home)
+        
+        # Para o time visitante, inverte os resultados (V vira D, D vira V)
+        resultados_away = []
+        for res in resultados_home:
+            if res == 'V':
+                resultados_away.append('D')
+            elif res == 'D':
+                resultados_away.append('V')
+            else:
+                resultados_away.append(res)  # 'E' ou '-' permanece igual
+        
+        pontos_h2h_away = calcular_pontos_h2h(resultados_away)
+        
+        # Armazena os dados H2H
+        h2h_dados[home] = {
+            "resultados": resultados_home,
+            "pontos": pontos_h2h_home,
+            "adversario": away
         }
+        
+        h2h_dados[away] = {
+            "resultados": resultados_away,
+            "pontos": pontos_h2h_away,
+            "adversario": home
+        }
+    
+    # 3.5. Atualizar créditos totais com pontos H2H
+    print("\n4.5. Atualizando créditos totais (créditos gerais + H2H)...")
+    for team_name in h2h_dados:
+        if team_name in dados_times:
+            creditos_gerais = dados_times[team_name]["creditos"]
+            pontos_h2h = h2h_dados[team_name]["pontos"]
+            creditos_totais = creditos_gerais + pontos_h2h
+            dados_times[team_name]["creditos_totais"] = creditos_totais
+            print(f"   {team_name}: {creditos_gerais:.2f} + {pontos_h2h} H2H = {creditos_totais:.2f}")
     
     # 4. Analisar próxima rodada
     print("\n5. Analisando próxima rodada...")
@@ -218,8 +291,9 @@ def gerar_html_premier_league():
         home = jogo["time1"]
         away = jogo["time2"]
         
-        creditos_home = dados_times.get(home, {}).get("creditos", 0)
-        creditos_away = dados_times.get(away, {}).get("creditos", 0)
+        # Usa créditos totais (gerais + H2H) se disponível, senão usa só os gerais
+        creditos_home = dados_times.get(home, {}).get("creditos_totais", dados_times.get(home, {}).get("creditos", 0))
+        creditos_away = dados_times.get(away, {}).get("creditos_totais", dados_times.get(away, {}).get("creditos", 0))
         diferenca = abs(creditos_home - creditos_away)
         
         analises_rodada.append({
@@ -508,8 +582,9 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
     html += """        </table>
 
         <h3 style="margin-top: 10px;">Créditos confronto direto</h3>
+        <p style="font-size: 9px; color: #666; margin: 2px 0 5px 0;">Últimos 5 jogos entre os times da próxima rodada</p>
         <table class="h2h-table">
-            <tr><th>Time</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Pts</th></tr>
+            <tr><th>Time</th><th>vs</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Pts</th></tr>
 """
     
     # Tabela H2H - ordena por nome do time
@@ -518,11 +593,13 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
         dados_h2h = h2h_dados[team_name]
         resultados = dados_h2h["resultados"]
         pontos = dados_h2h["pontos"]
+        adversario = dados_h2h.get("adversario", "")
         
         # Nome do time (encurtado se necessário)
-        nome_display = team_name if len(team_name) <= 15 else team_name[:12] + "..."
+        nome_display = team_name if len(team_name) <= 12 else team_name[:10] + "."
+        adversario_display = adversario[:3].upper() if len(adversario) > 3 else adversario
         
-        html += f'            <tr><td>{nome_display}</td>'
+        html += f'            <tr><td>{nome_display}</td><td style="font-size: 9px; color: #666;">{adversario_display}</td>'
         
         # 5 resultados
         for res in resultados:
@@ -606,16 +683,29 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
     <!-- Sidebar Direita: Pontos de Crédito e BETs -->
     <div class="sidebar-right">
         <h3>Times da Premier League</h3>
+        <p style="font-size: 10px; color: #666; margin: 2px 0 5px 0;">Créditos gerais + H2H confronto direto</p>
         <table class="times-table">
-            <tr><th>Time</th><th>Pontos de Crédito</th></tr>
+            <tr><th>Time</th><th>Créditos Totais</th></tr>
 """
     
-    # Ordena times por créditos (do maior para o menor)
-    times_ordenados = sorted(dados_times.items(), key=lambda x: x[1]["creditos"], reverse=True)
+    # Separa times em dois grupos: com H2H (próxima rodada) e sem H2H
+    times_com_h2h = []
+    times_sem_h2h = []
     
-    for idx, (team_name, dados) in enumerate(times_ordenados):
-        creditos = dados["creditos"]
-        
+    for team_name, dados in dados_times.items():
+        if "creditos_totais" in dados:
+            times_com_h2h.append((team_name, dados["creditos_totais"]))
+        else:
+            times_sem_h2h.append((team_name, dados["creditos"]))
+    
+    # Ordena ambos os grupos por créditos (do maior para o menor)
+    times_com_h2h.sort(key=lambda x: x[1], reverse=True)
+    times_sem_h2h.sort(key=lambda x: x[1], reverse=True)
+    
+    # Combina: primeiro os times com H2H (da próxima rodada), depois os outros
+    times_ordenados = times_com_h2h + times_sem_h2h
+    
+    for idx, (team_name, creditos) in enumerate(times_ordenados):
         # Define a classe CSS: top3 para os 3 primeiros, negativo para negativos
         if idx < 3:
             css_class = "top3"

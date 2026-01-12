@@ -119,33 +119,49 @@ def scrape_h2h_ogol(time1, time2, debug=False):
             page.goto(url, wait_until="domcontentloaded", timeout=60000)
             page.wait_for_timeout(3000)
             
-            # Busca a tabela de jogos
-            linhas = page.query_selector_all("table.jogos tbody tr")
+            # Busca a tabela de jogos - estrutura atualizada do ogol
+            linhas = page.query_selector_all("table.zztable.stats tbody tr.parent")
             
             if debug:
                 print(f"Encontradas {len(linhas)} linhas na tabela H2H")
             
             for linha in linhas:
                 try:
-                    # Extrai todas as células
+                    # Extrai as células
                     celulas = linha.query_selector_all("td")
                     
-                    if len(celulas) < 5:
+                    if len(celulas) < 7:
                         continue
                     
-                    # Resultado (V, E, D)
-                    resultado = celulas[0].inner_text().strip()
+                    # Estrutura: form | data | time casa | logo | resultado | logo | time visitante | rodada | competição
+                    # Resultado (V, E, D) - está na primeira célula
+                    resultado_elem = celulas[0].query_selector("div.sign")
+                    if resultado_elem:
+                        resultado_class = resultado_elem.get_attribute("class")
+                        if "victory" in resultado_class or "win" in resultado_class:
+                            resultado = "V"
+                        elif "draw" in resultado_class:
+                            resultado = "E"
+                        elif "loss" in resultado_class or "defeat" in resultado_class:
+                            resultado = "D"
+                        else:
+                            resultado = resultado_elem.inner_text().strip()
+                    else:
+                        resultado = ""
                     
                     # Data
                     data = celulas[1].inner_text().strip()
                     
-                    # Informações do jogo (times e placar)
-                    info_jogo = celulas[2].inner_text().strip()
+                    # Times e placar
+                    time_casa = celulas[2].inner_text().strip()
+                    placar = celulas[4].inner_text().strip()
+                    time_visitante = celulas[6].inner_text().strip()
                     
-                    # Competição
-                    competicao = celulas[3].inner_text().strip() if len(celulas) > 3 else ""
+                    # Competição (se houver)
+                    competicao = celulas[8].inner_text().strip() if len(celulas) > 8 else ""
                     
-                    # Monta texto do jogo
+                    # Monta informação do jogo
+                    info_jogo = f"{time_casa} {placar} {time_visitante}"
                     texto_jogo = f"{resultado} {data} {info_jogo}"
                     
                     jogos_h2h.append({
