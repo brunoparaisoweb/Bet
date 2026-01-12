@@ -579,12 +579,12 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
     
     # Próxima rodada na sidebar
     for jogo in PROXIMA_RODADA:
-        # Simplifica os nomes
-        home_short = jogo["time1"][:3].upper() if len(jogo["time1"]) > 10 else jogo["time1"]
-        away_short = jogo["time2"][:3].upper() if len(jogo["time2"]) > 10 else jogo["time2"]
+        # Usa nomes completos dos times
+        home_name = jogo["time1"]
+        away_name = jogo["time2"]
         data_short = jogo["data"][:5]  # Pega só DD/MM
         
-        html += f'        <div class="jogo-rodada">{data_short} - {home_short} x {away_short}</div>\n'
+        html += f'        <div class="jogo-rodada">{data_short} - {home_name} x {away_name}</div>\n'
     
     html += """
         <h3 style="margin-top: 12px;">Classificação</h3>
