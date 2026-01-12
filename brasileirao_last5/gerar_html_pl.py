@@ -580,8 +580,9 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
                 date_formatted = "N/A"
             
             # Determina a classe CSS (vitória, empate, derrota)
-            e_casa = team_name in home_team or home_team in team_name
-            e_fora = team_name in away_team or away_team in team_name
+            # Usa função de correspondência para aceitar apelidos (Wolves/Wolverhampton, etc)
+            e_casa = times_correspondem(team_name, home_team)
+            e_fora = times_correspondem(team_name, away_team)
             
             css_class = ""
             if e_casa:
