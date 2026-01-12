@@ -477,20 +477,26 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
             border-left: 3px solid #ff9800;
         }
         .bet-item {
-            padding: 10px;
-            margin-bottom: 8px;
+            padding: 4px 6px;
+            margin-bottom: 4px;
             background: #f8f9fa;
-            border-radius: 4px;
-            border-left: 3px solid #28a745;
+            border-radius: 3px;
+            border-left: 2px solid #28a745;
         }
         .bet-time {
             font-weight: 600;
             color: #28a745;
-            font-size: 13px;
+            font-size: 10px;
         }
         .bet-diff {
-            font-size: 11px;
+            font-size: 9px;
             color: #666;
+            margin-top: 1px;
+        }
+        .bet-matchup {
+            font-size: 8px;
+            color: #888;
+            margin-top: 1px;
         }
         .pos {
             display: inline-block;
@@ -718,25 +724,28 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
     
     html += """        </table>
 
-        <h3 style="margin-top: 20px; color: #d00;">BETs Recomendadas</h3>
-        <p style="font-size: 11px; color: #666; margin-top: 0;">
-            Jogos com diferença ≥ 2.0 pontos
+        <h3 style="margin-top: 12px; color: #d00; font-size: 0.85em;">BETs Recomendadas</h3>
+        <p style="font-size: 9px; color: #666; margin: 2px 0 4px 0;">
+            Diferença ≥ 2.0 pts
         </p>
 """
     
     if bets:
         for bet in bets:
+            # Encurta os nomes dos times se forem muito longos
+            mandante_short = bet['mandante'][:12] + "." if len(bet['mandante']) > 12 else bet['mandante']
+            visitante_short = bet['visitante'][:12] + "." if len(bet['visitante']) > 12 else bet['visitante']
+            favorito_short = bet['favorito'][:15] + "." if len(bet['favorito']) > 15 else bet['favorito']
+            
             html += f"""        <div class="bet-item">
-            <div class="bet-time">{bet['favorito']}</div>
-            <div style="font-size: 11px; color: #666; margin-top: 3px;">
-                {bet['mandante']} vs {bet['visitante']}
-            </div>
-            <div class="bet-diff">Dif: {bet['diferenca']:.2f} pts</div>
+            <div class="bet-time">{favorito_short}</div>
+            <div class="bet-matchup">{mandante_short} vs {visitante_short}</div>
+            <div class="bet-diff">Dif: {bet['diferenca']:.1f}</div>
         </div>
 """
     else:
-        html += """        <p style="font-size: 12px; color: #999;">
-            Nenhuma aposta com diferença ≥ 2.0 pontos.
+        html += """        <p style="font-size: 10px; color: #999; margin: 8px 0;">
+            Nenhuma BET ≥ 2.0 pts
         </p>
 """
     
