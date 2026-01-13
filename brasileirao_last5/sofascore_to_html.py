@@ -428,7 +428,7 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
 </head>
 <body>
     <div class="sidebar">
-        <h3>1ª Rodada - Brasileirão</h3>
+        <h3>Próxima Rodada - Brasileirão</h3>
 '''
     
     for jogo in jogos_rodada:

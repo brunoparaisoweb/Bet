@@ -622,7 +622,6 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
     html += """        </table>
 
         <h3 style="margin-top: 10px;">Créditos confronto direto</h3>
-        <p style="font-size: 9px; color: #666; margin: 2px 0 5px 0;">Últimos 5 jogos entre os times da próxima rodada</p>
         <table class="h2h-table">
             <tr><th>Time</th><th>vs</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Pts</th></tr>
 """
@@ -723,7 +722,6 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
     <!-- Sidebar Direita: Pontos de Crédito e BETs -->
     <div class="sidebar-right">
         <h3>Times da Premier League</h3>
-        <p style="font-size: 10px; color: #666; margin: 2px 0 5px 0;">Créditos gerais + H2H confronto direto</p>
         <table class="times-table">
             <tr><th>Time</th><th>Créditos Totais</th></tr>
 """
@@ -752,9 +750,6 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
     html += """        </table>
 
         <h3 style="margin-top: 12px; color: #d00; font-size: 0.85em;">BETs Recomendadas</h3>
-        <p style="font-size: 9px; color: #666; margin: 2px 0 4px 0;">
-            Diferença ≥ 2.0 pts
-        </p>
 """
     
     if bets:
