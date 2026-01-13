@@ -569,6 +569,28 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
             background: #ff6b6b !important;
             color: #fff;
         }
+        .aviso-box {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff3cd;
+            border: 2px solid #ff9800;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 11px;
+            color: #856404;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 999;
+            max-width: 600px;
+            text-align: center;
+        }
+        .aviso-box strong {
+            color: #37003c;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -755,6 +777,10 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
 """
     
     html += """    </div>
+    <div class="aviso-box">
+        <strong>⚠️ ATENÇÃO</strong>
+        Atentar ao encerramento da temporada. Atualizar: - ID e NOME dos novos times; - Atualizar as TABELAS
+    </div>
     <footer>Development for Bruno Paraiso - 2026 | Todos os direitos reservados</footer>
 </body>
 </html>
