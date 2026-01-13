@@ -6,16 +6,16 @@ Próxima rodada e classificação atual
 
 # Próxima rodada da LaLiga (Rodada 20 - atualizar conforme necessário)
 PROXIMA_RODADA = [
-    {"time1": "Barcelona", "time2": "Real Sociedad", "data": "18/01/26 17:00"},
-    {"time1": "Real Madrid", "time2": "Levante", "data": "18/01/26 14:30"},
-    {"time1": "Atlético Madrid", "time2": "Villarreal", "data": "19/01/26 12:15"},
-    {"time1": "Real Betis", "time2": "Sevilla", "data": "19/01/26 10:00"},
-    {"time1": "Valencia", "time2": "Getafe", "data": "18/01/26 12:15"},
+    {"time1": "Espanyol", "time2": "Girona", "data": "18/01/26 10:00"},
+    {"time1": "Real Madrid", "time2": "Levante", "data": "18/01/26 12:15"},
+    {"time1": "Mallorca", "time2": "Athletic Club", "data": "18/01/26 14:30"},
+    {"time1": "Osasuna", "time2": "Real Oviedo", "data": "18/01/26 17:00"},
+    {"time1": "Real Betis", "time2": "Villarreal", "data": "19/01/26 10:00"},
+    {"time1": "Getafe", "time2": "Valencia", "data": "19/01/26 12:15"},
+    {"time1": "Atlético Madrid", "time2": "Alavés", "data": "19/01/26 14:30"},
     {"time1": "Celta", "time2": "Rayo Vallecano", "data": "19/01/26 17:00"},
-    {"time1": "Espanyol", "time2": "Osasuna", "data": "18/01/26 10:00"},
-    {"time1": "Elche", "time2": "Girona", "data": "19/01/26 14:30"},
-    {"time1": "Mallorca", "time2": "Alavés", "data": "18/01/26 14:30"},
-    {"time1": "Athletic Club", "time2": "Real Oviedo", "data": "19/01/26 10:00"}
+    {"time1": "Real Sociedad", "time2": "Barcelona", "data": "19/01/26 19:00"},
+    {"time1": "Elche", "time2": "Sevilla", "data": "19/01/26 21:00"}
 ]
 
 # Classificação atual da LaLiga (atualizar após cada rodada)
