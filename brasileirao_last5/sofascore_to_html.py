@@ -354,7 +354,7 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Últimos 5 jogos - Brasileirão Betano</title>
+    <title>Brasileirão Betano</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f7f7f7; display: flex; margin: 0; padding: 0 0 20px 0; }
         .sidebar { width: 220px; padding: 10px; background: #fff; box-shadow: 2px 0 8px #0001; font-size: 0.75em; }
@@ -492,7 +492,7 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
     html += '''
     </div>
     <div class="main-content">
-        <h1>Últimos 5 jogos<br><small>Brasileirão Betano</small></h1>
+        <h1>Brasileirão Betano</h1>
 '''
     for time_nome, jogos in times_jogos:
         html += f'    <div class="time-section">\n'

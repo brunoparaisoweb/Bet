@@ -660,7 +660,7 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
     
     <!-- Conteúdo Principal: Últimos 5 Jogos de Cada Time -->
     <div class="main-content">
-        <h1>LaLiga 2025/2026<br><small>Últimos 5 Jogos</small></h1>
+        <h1>LaLiga 2025/2026</h1>
 """
     
     # Ordena times alfabeticamente para exibição
