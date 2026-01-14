@@ -168,9 +168,9 @@ def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", deb
             text = page.inner_text("body")
             page_html = text
         browser.close()
-    print(f"Debug: found {len(candidates)} candidate nodes")
+    # print(f"Debug: found {len(candidates)} candidate nodes")
     if debug:
-        print(f"Debug: URL acessada: {url}")
+        # print(f"Debug: URL acessada: {url}")
         # Mostra amostra do conteúdo da página
         if page_html and isinstance(page_html, str):
             # Procura por "Brasileirão" no HTML
@@ -183,7 +183,7 @@ def scrape_sofascore_last5(team_id: int = 5981, team_name: str = "flamengo", deb
     try:
         with open("sofascore_debug.html", "w", encoding="utf-8") as f:
             f.write(page_html)
-        print("Debug: saved page HTML to sofascore_debug.html")
+        # print("Debug: saved page HTML to sofascore_debug.html")
     except Exception as e:
         print("Debug: failed saving HTML:", e)
     results: List[Dict] = []

@@ -39,6 +39,7 @@ LALIGA_TEAM_IDS = {
 def scrape_sofascore_last5(team_id, team_name, debug=False, click_navigation=True):
     """
     Busca os últimos 5 jogos do time no campeonato LaLiga 2025/2026.
+    Navega dentro do card "Matches" para encontrar jogos mais antigos se necessário.
     
     Args:
         team_id: ID do time no SofaScore
@@ -74,130 +75,103 @@ def scrape_sofascore_last5(team_id, team_name, debug=False, click_navigation=Tru
                     f.write(page.content())
                 print("Debug: saved page HTML to sofascore_laliga_debug.html")
             
-            # Busca todos os cards de competições
-            competition_cards = page.query_selector_all('.card-component')
-            
-            if debug:
-                print(f"Debug: found {len(competition_cards)} competition cards")
-            
             jogos_laliga = []
+            jogos_ids = set()  # Para evitar duplicatas
+            max_cliques = 15
+            cliques_realizados = 0
             
-            # Processa cada card de competição
-            for card_idx, card in enumerate(competition_cards):
-                try:
-                    # Verifica se é o card da LaLiga
-                    card_html = card.inner_html()
-                    
-                    # Procura pela imagem do torneio LaLiga (ID 8)
-                    is_laliga = 'unique-tournament/8/image' in card_html
-                    is_copa_rey = 'unique-tournament/58/image' in card_html
-                    is_supercopa = 'unique-tournament/355/image' in card_html
-                    
-                    if debug and card_idx < 10:
+            while len(jogos_laliga) < 5 and cliques_realizados < max_cliques:
+                # Busca todos os cards
+                competition_cards = page.query_selector_all('.card-component')
+                
+                if debug:
+                    print(f"Debug: Tentativa {cliques_realizados + 1} - {len(jogos_laliga)} jogos coletados")
+                
+                # Encontra o card "Matches" (que contém todos os jogos)
+                matches_card = None
+                matches_text = ""
+                for card in competition_cards:
+                    try:
                         card_text = card.inner_text()
                         first_line = card_text.split('\n')[0] if card_text else ""
-                        print(f"Card {card_idx}: LaLiga={is_laliga}, Copa={is_copa_rey}, Supercopa={is_supercopa}, first_line={repr(first_line[:50])}")
+                        if first_line in ['Matches', 'Partidas']:
+                            matches_card = card
+                            matches_text = card_text
+                            break
+                    except:
+                        continue
+                
+                if not matches_card:
+                    if debug:
+                        print(f"Debug: Card de Matches não encontrado")
+                    break
+                
+                # Processa o texto do card Matches para extrair jogos LaLiga
+                lines = matches_text.split('\n')
+                current_competition = None
+                i = 0
+                
+                while i < len(lines):
+                    line = lines[i].strip()
                     
-                    # Ignora Copa del Rey e Supercopa - processa apenas LaLiga
-                    if is_copa_rey or is_supercopa:
+                    # Detecta headers de campeonato (SEMPRE atualiza o campeonato atual)
+                    if line in ['LaLiga', 'Copa del Rey', 'UEFA Champions League', 
+                               'Supercopa de España', 'Supercopa de Espa±a', 'Supercopa']:
+                        current_competition = line
                         if debug:
-                            print(f"Debug: Skipping card {card_idx} (Copa del Rey or Supercopa)")
+                            print(f"  >> Campeonato: {current_competition}")
+                        i += 1
                         continue
                     
-                    # Se não for LaLiga, pula
-                    if not is_laliga:
-                        continue
-                    
-                    if debug:
-                        print(f"Debug: Processing LaLiga card {card_idx}")
-                    
-                    # Busca eventos dentro deste card da LaLiga
-                    eventos = card.query_selector_all('[class*="event"]')
-                    
-                    if debug:
-                        print(f"Debug: found {len(eventos)} events in LaLiga card")
-                    
-                    # Processa cada evento
-                    for i, evento in enumerate(eventos):
-                        try:
-                            # Pega o texto completo do evento com tratamento de erro
-                            try:
-                                texto = evento.inner_text()
-                            except Exception:
-                                try:
-                                    texto = evento.text_content()
-                                except Exception:
-                                    continue
+                    # Se estamos em LaLiga e é uma data de jogo
+                    if current_competition == 'LaLiga' and re.match(r'\d{2}/\d{2}/\d{2}', line):
+                        date = line
+                        i += 1
+                        if i >= len(lines):
+                            break
                             
-                            if not texto:
-                                continue
+                        status_line = lines[i].strip()
+                        
+                        # Se for FT ou F2°T (jogo finalizado)
+                        if status_line == 'FT' or 'F2' in status_line:
+                            i += 1
+                            if i >= len(lines):
+                                break
                             
-                            # Debug: mostra eventos
-                            if debug:
-                                linhas = texto.strip().split('\n')
-                                date = linhas[0] if len(linhas) > 0 else ""
-                                if i < 15 or ("F2" in texto or "Finalizado" in texto):
-                                    print(f"  Event {i}: text={repr(texto[:200])}")
+                            # Próximas linhas: home, away, scores
+                            home = lines[i].strip() if i < len(lines) else None
+                            i += 1
+                            away = lines[i].strip() if i < len(lines) else None
+                            i += 1
                             
-                            # Verifica se é jogo finalizado
-                            is_finished = ("F2°T" in texto or "F2°" in texto or "F2T" in texto or
-                                         "Finalizado" in texto or 
-                                         (re.search(r'\nF\n', texto) and re.search(r'\d+', texto)))
+                            # Coletar placares (formato: score_home, ??, score_away, ??)
+                            scores = []
+                            while i < len(lines) and len(scores) < 4:
+                                score_line = lines[i].strip()
+                                if re.match(r'^\d+$', score_line):
+                                    scores.append(int(score_line))
+                                    i += 1
+                                elif score_line in ['W', 'D', 'L']:
+                                    i += 1
+                                    break
+                                else:
+                                    break
                             
-                            if debug and is_finished:
-                                print(f"    [FINISHED] Detected finished match: {repr(texto[:100])}")
+                            # Formato: score_home, ??, score_away, ?? 
+                            home_score = scores[0] if len(scores) >= 1 else None
+                            away_score = scores[2] if len(scores) >= 3 else (scores[1] if len(scores) >= 2 else None)
                             
-                            if is_finished:
-                                linhas = texto.strip().split('\n')
+                            if home and away and home_score is not None and away_score is not None:
+                                # Cria ID único para evitar duplicatas
+                                jogo_id = f"{home}{away}{home_score}{away_score}{date}"
                                 
-                                # Extrai informações
-                                comp = "LaLiga"
-                                date = None
-                                home = None
-                                away = None
-                                home_score = None
-                                away_score = None
-                                
-                                # Parse das linhas
-                                for idx, linha in enumerate(linhas):
-                                    linha_clean = linha.strip()
-                                    
-                                    if re.match(r'\d{2}/\d{2}/\d{2}', linha_clean):
-                                        date = linha_clean
-                                    elif linha_clean and len(linha_clean) > 2:
-                                        # Ignora marcadores de status
-                                        if re.match(r'^F\d', linha_clean):
-                                            continue
-                                        if re.match(r'^[FDWLE]$', linha_clean):
-                                            continue
-                                        if re.match(r'^\d+$', linha_clean):
-                                            continue
-                                        if re.match(r'^\d{2}:\d{2}$', linha_clean):
-                                            continue
-                                        
-                                        # Possível nome de time
-                                        if not home:
-                                            home = linha_clean
-                                        elif not away and linha_clean != home:
-                                            away = linha_clean
-                                
-                                # Extrai placares
-                                scores = re.findall(r'\n(\d+)\n', texto)
-                                if len(scores) >= 2:
-                                    try:
-                                        home_score = int(scores[0])
-                                        away_score = int(scores[1])
-                                    except:
-                                        pass
-                                
-                                # Se encontrou todas as informações, adiciona o jogo
-                                if home and away and home_score is not None and away_score is not None:
+                                if jogo_id not in jogos_ids:
+                                    jogos_ids.add(jogo_id)
                                     if debug:
-                                        print(f"  [OK] Jogo valido: {home} {home_score} x {away_score} {away}")
-                                    
+                                        print(f"  [OK] LaLiga: {home} {home_score} x {away_score} {away} ({date})")
                                     jogos_laliga.append({
                                         "competition": {"name": "LaLiga"},
-                                        "startDate": date or "",
+                                        "startDate": date,
                                         "homeTeam": {"name": home},
                                         "awayTeam": {"name": away},
                                         "score": {
@@ -207,22 +181,46 @@ def scrape_sofascore_last5(team_id, team_name, debug=False, click_navigation=Tru
                                             }
                                         }
                                     })
-                                else:
-                                    if debug:
-                                        print(f"    [SKIP] Missing data - home={repr(home)}, away={repr(away)}, hs={home_score}, as={away_score}")
-                        
-                        except Exception as e:
-                            if debug:
-                                print(f"Debug: Erro ao processar evento {i}: {e}")
                             continue
+                    i += 1
                 
+                # Se já temos 5 jogos, termina
+                if len(jogos_laliga) >= 5:
+                    if debug:
+                        print(f"Debug: Coletados {len(jogos_laliga)} jogos LaLiga, encerrando")
+                    break
+                
+                # Navegar para jogos anteriores clicando na seta esquerda DENTRO do card Matches
+                cliques_realizados += 1
+                
+                try:
+                    nav_buttons = matches_card.query_selector_all('button')
+                    if nav_buttons and len(nav_buttons) > 0:
+                        left_button = nav_buttons[0]  # Primeiro botão é seta esquerda
+                        
+                        if left_button.is_visible() and not left_button.get_attribute('disabled'):
+                            if debug:
+                                print(f"Debug: Clicando na seta esquerda dentro do card Matches...")
+                            left_button.click()
+                            page.wait_for_timeout(2000)
+                        else:
+                            if debug:
+                                print(f"Debug: Botão de navegação desabilitado ou não visível")
+                            break
+                    else:
+                        if debug:
+                            print(f"Debug: Botões de navegação não encontrados no card")
+                        break
                 except Exception as e:
                     if debug:
-                        print(f"Debug: Erro ao processar card {card_idx}: {e}")
-                    continue
+                        print(f"Debug: Erro ao navegar: {e}")
+                    break
             
-            # Retorna até 5 jogos mais recentes
+            # Retorna os 5 jogos mais recentes da LaLiga
             jogos = jogos_laliga[:5]
+            
+            if debug:
+                print(f"Debug: Retornando {len(jogos)} jogos LaLiga")
             
         except Exception as e:
             print(f"Erro ao buscar jogos: {e}")
