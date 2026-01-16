@@ -306,8 +306,9 @@ def gerar_html_laliga():
             "favorito": home if creditos_home > creditos_away else away
         })
     
-    # 5. Identificar BETs (diferença >= 2.0)
-    bets = [a for a in analises_rodada if a["diferenca"] >= 2.0]
+    # 5. Identificar BETs (diferença >= 2.0 E favorito com pontuação > 0)
+    bets = [a for a in analises_rodada if a["diferenca"] >= 2.0 and 
+            (a["creditos_mandante"] > 0 if a["favorito"] == a["mandante"] else a["creditos_visitante"] > 0)]
     bets.sort(key=lambda x: x["diferenca"], reverse=True)
     
     print(f"\n6. Encontradas {len(bets)} apostas recomendadas (diferença >= 2.0)")
