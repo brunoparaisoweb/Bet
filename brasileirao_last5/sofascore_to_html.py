@@ -325,9 +325,9 @@ def analisar_apostas(jogos_rodada, pontos_credito):
         # Calcula a diferença
         diferenca = abs(pontos_time1 - pontos_time2)
         
-        # Se a diferença for >= 2, adiciona o time com maior pontuação
+        # Se a diferença for >= 2 e o favorito tiver pontuação > 0, adiciona o time com maior pontuação
         if diferenca >= 2.0:
-            if pontos_time1 > pontos_time2:
+            if pontos_time1 > pontos_time2 and pontos_time1 > 0:
                 apostas.append({
                     "time": time1,
                     "adversario": time2,
@@ -335,7 +335,7 @@ def analisar_apostas(jogos_rodada, pontos_credito):
                     "pontos_adv": pontos_time2,
                     "diferenca": diferenca
                 })
-            else:
+            elif pontos_time2 > pontos_time1 and pontos_time2 > 0:
                 apostas.append({
                     "time": time2,
                     "adversario": time1,
