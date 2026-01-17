@@ -9,6 +9,7 @@ import json
 import os
 from sofascore_scraper import scrape_sofascore_last5
 from ge_scraper import scrape_primeira_rodada, scrape_classificacao
+from ogol_scraper import scrape_h2h_ogol
 
 def calcular_pontos_credito(time_nome, jogos):
     """Calcula pontos de crédito baseado nos últimos jogos.
@@ -98,131 +99,99 @@ def calcular_bonus_mandante(jogos_rodada):
             bonus[nome_completo] = bonus.get(nome_completo, 0) + 0.5
     return bonus
 
-def carregar_dados_h2h():
-    """Carrega dados H2H do arquivo JSON gerado pelo gerar_h2h_ogol.py"""
-    try:
-        with open("h2h_data.json", "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print("Aviso: Arquivo h2h_data.json não encontrado. Execute gerar_h2h_ogol.py primeiro.")
-        return []
+def normalizar_nome_brasileiro(nome):
+    """
+    Normaliza nomes de times brasileiros para formato padrão (corrige encoding)
+    Mapeia diretamente nomes com encoding problemático para os nomes corretos
+    """
+    # Mapeamento direto de todos os possíveis nomes problemáticos
+    mapeamento_direto = {
+        # Atlético-MG variações
+        "AtlÚtico-MG": "Atlético-MG",
+        "Atl‚tico-MG": "Atlético-MG",
+        "Atletico-MG": "Atlético-MG",
+        # São Paulo variações
+        "SÒo Paulo": "São Paulo",
+        "S®o Paulo": "São Paulo",
+        "Sao Paulo": "São Paulo",
+        # Grêmio variações
+        "GrÛmio": "Grêmio",
+        "Gr‰mio": "Grêmio",
+        "Gremio": "Grêmio",
+        # Vitória variações
+        "Vit¾ria": "Vitória",
+        "Vit¢ria": "Vitória",
+        "Vitoria": "Vitória"
+    }
+    
+    return mapeamento_direto.get(nome, nome)
 
-def processar_resultados_h2h(dados_h2h):
+def extrair_h2h_confronto_direto(time_mandante, time_visitante, debug=False):
     """
-    Processa os dados H2H e retorna um dicionário com os resultados e pontos de cada time.
-    Formato: {"Time": {"resultados": ["V", "D", "E", "V", "D"], "pontos": 0.5}}
-    
-    Pontuação:
-    - Vitória fora de casa: +0.2
-    - Vitória em casa: +0.1
-    - Empate fora de casa: +0.1
-    - Empate em casa: 0
-    - Derrota em casa: -0.2
-    - Derrota fora de casa: -0.1
+    Extrai os últimos 5 jogos entre dois times específicos (confronto direto).
+    Retorna lista de resultados do ponto de vista do time mandante:
+    'V' (vitória), 'E' (empate), 'D' (derrota)
     """
-    resultados = {}
+    resultados = []
     
-    for confronto in dados_h2h:
-        time1 = confronto["time1"]
-        time2 = confronto["time2"]
-        h2h_list = confronto["h2h"]
-        
-        # Inicializa dicionários de resultados se não existirem
-        if time1 not in resultados:
-            resultados[time1] = {"resultados": [], "pontos": 0.0}
-        if time2 not in resultados:
-            resultados[time2] = {"resultados": [], "pontos": 0.0}
-        
-        # Processa cada jogo H2H
-        for jogo in h2h_list:
-            texto = jogo["texto"]
-            
-            # Extrai informações do texto
-            # Formato: "V 2025-12-02 Time1 X-Y Time2 ..."
-            # Precisamos identificar qual time jogou em casa
-            
-            # Extrai resultado (V, E, D)
-            resultado_time1 = texto[0]  # Primeiro caractere (V, E ou D)
-            
-            # Identifica mandante e visitante no texto
-            # O formato geralmente é: "RESULTADO DATA MANDANTE PLACAR VISITANTE RESTO"
-            partes = texto.split()
-            
-            # Procura pelo placar (formato X-Y)
-            placar_idx = -1
-            for i, parte in enumerate(partes):
-                if '-' in parte and any(c.isdigit() for c in parte):
-                    placar_idx = i
-                    break
-            
-            if placar_idx > 0:
-                # O mandante está antes do placar, visitante depois
-                # Junta as palavras antes do placar para formar o nome do mandante
-                mandante_palavras = []
-                for i in range(2, placar_idx):  # Começa do índice 2 (depois de resultado e data)
-                    mandante_palavras.append(partes[i])
-                mandante_texto = " ".join(mandante_palavras)
-                
-                # Junta as palavras depois do placar para o visitante
-                visitante_palavras = []
-                for i in range(placar_idx + 1, len(partes)):
-                    palavra = partes[i]
-                    # Para quando encontrar indicadores de rodada/competição
-                    if palavra.startswith('R') or palavra.startswith('SF') or palavra.startswith('QF') or palavra.startswith('1/'):
-                        break
-                    visitante_palavras.append(palavra)
-                visitante_texto = " ".join(visitante_palavras)
-                
-                # Verifica se time1 é mandante ou visitante
-                time1_mandante = time1.lower() in mandante_texto.lower() or mandante_texto.lower() in time1.lower()
-                
-                # Calcula pontos baseado no resultado e mando de campo
-                if resultado_time1 == "V":
-                    # Vitória para time1
-                    if time1_mandante:
-                        # Vitória em casa
-                        resultados[time1]["resultados"].append("V")
-                        resultados[time1]["pontos"] += 0.1
-                        resultados[time2]["resultados"].append("D")
-                        resultados[time2]["pontos"] -= 0.1  # Derrota fora
-                    else:
-                        # Vitória fora
-                        resultados[time1]["resultados"].append("V")
-                        resultados[time1]["pontos"] += 0.2
-                        resultados[time2]["resultados"].append("D")
-                        resultados[time2]["pontos"] -= 0.2  # Derrota em casa
-                
-                elif resultado_time1 == "E":
-                    # Empate
-                    if time1_mandante:
-                        # Empate em casa
-                        resultados[time1]["resultados"].append("E")
-                        resultados[time1]["pontos"] += 0.0
-                        resultados[time2]["resultados"].append("E")
-                        resultados[time2]["pontos"] += 0.1  # Empate fora
-                    else:
-                        # Empate fora
-                        resultados[time1]["resultados"].append("E")
-                        resultados[time1]["pontos"] += 0.1
-                        resultados[time2]["resultados"].append("E")
-                        resultados[time2]["pontos"] += 0.0  # Empate em casa
-                
-                elif resultado_time1 == "D":
-                    # Derrota para time1
-                    if time1_mandante:
-                        # Derrota em casa
-                        resultados[time1]["resultados"].append("D")
-                        resultados[time1]["pontos"] -= 0.2
-                        resultados[time2]["resultados"].append("V")
-                        resultados[time2]["pontos"] += 0.2  # Vitória fora
-                    else:
-                        # Derrota fora
-                        resultados[time1]["resultados"].append("D")
-                        resultados[time1]["pontos"] -= 0.1
-                        resultados[time2]["resultados"].append("V")
-                        resultados[time2]["pontos"] += 0.1  # Vitória em casa
+    # Busca confrontos diretos no ogol.com.br
+    jogos_h2h = scrape_h2h_ogol(time_mandante, time_visitante, debug=debug)
     
-    return resultados
+    if debug:
+        print(f"  Confronto {time_mandante} vs {time_visitante}: {len(jogos_h2h)} jogos encontrados")
+    
+    for jogo in jogos_h2h[:5]:  # Até 5 jogos
+        # O resultado vem no campo "texto", exemplo: "V 2025-11-05 São Paulo 2-2 Flamengo..."
+        texto = jogo.get("texto", "").strip()
+        
+        # O primeiro caractere do texto é o resultado (V, E ou D)
+        if len(texto) > 0:
+            resultado = texto[0].upper()
+            
+            if resultado in ['V', 'E', 'D']:
+                resultados.append(resultado)
+            else:
+                resultados.append('-')
+        else:
+            resultados.append('-')
+    
+    # Preenche com '-' se não tiver 5 jogos
+    while len(resultados) < 5:
+        resultados.append('-')
+    
+    return resultados[:5]
+
+def calcular_pontos_h2h(resultados):
+    """
+    Calcula pontos H2H baseado nos últimos 5 jogos.
+    V = +0.2 (casa) ou +0.1 (fora)
+    E = 0.0 (casa) ou +0.1 (fora)
+    D = -0.2 (casa) ou -0.1 (fora)
+    """
+    pontos = 0.0
+    jogos_validos = 0
+    
+    for res in resultados:
+        if res == 'V':
+            pontos += 0.2  # Vitória (simplificado, sem distinguir casa/fora)
+            jogos_validos += 1
+        elif res == 'E':
+            pontos += 0.05  # Empate (média entre casa e fora)
+            jogos_validos += 1
+        elif res == 'D':
+            pontos -= 0.15  # Derrota (média entre casa e fora)
+            jogos_validos += 1
+    
+    return round(pontos, 1)
+
+# FUNÇÕES ANTIGAS (não mais utilizadas - dados H2H agora são buscados diretamente via ogol_scraper)
+# def carregar_dados_h2h():
+#     """Carrega dados H2H do arquivo JSON gerado pelo gerar_h2h_ogol.py"""
+#     (função antiga removida - não mais necessária)
+
+# def processar_resultados_h2h(dados_h2h):
+#     """Processa os dados H2H do arquivo JSON"""
+#     (função antiga removida - não mais necessária)
 
 def calcular_bonus_classificacao(classificacao):
     """Adiciona pontos de crédito baseado na posição na classificação do campeonato."""
@@ -758,19 +727,80 @@ def main():
         else:
             pontos_credito[time] = bonus
     
-    # Carrega e processa dados H2H
-    print("Carregando dados de confrontos diretos (H2H)...")
-    dados_h2h = carregar_dados_h2h()
-    resultados_h2h = processar_resultados_h2h(dados_h2h) if dados_h2h else None
+    # Busca e processa dados H2H dos confrontos diretos da próxima rodada
+    print("\nBuscando dados de confrontos diretos (H2H)...")
+    resultados_h2h = {}
     
-    # Adiciona pontos H2H aos pontos de crédito totais
-    if resultados_h2h:
-        for time, dados in resultados_h2h.items():
-            pontos_h2h = dados["pontos"]
-            if time in pontos_credito:
-                pontos_credito[time] += pontos_h2h
+    # Mapeamento de abreviações para nomes completos (inclui variações com encoding problemático)
+    abreviacoes = {
+        "FLU": "Fluminense", "Fluminense": "Fluminense",
+        "GRE": "Grêmio", "Grêmio": "Grêmio",
+        "BOT": "Botafogo", "Botafogo": "Botafogo",
+        "CRU": "Cruzeiro", "Cruzeiro": "Cruzeiro",
+        "SAO": "São Paulo", "São Paulo": "São Paulo",
+        "FLA": "Flamengo", "Flamengo": "Flamengo",
+        "COR": "Corinthians", "Corinthians": "Corinthians",
+        "BAH": "Bahia", "Bahia": "Bahia",
+        "MIR": "Mirassol", "Mirassol": "Mirassol",
+        "VAS": "Vasco", "Vasco": "Vasco",
+        "CAM": "Atlético-MG", "ATL": "Atlético-MG", "Atlético-MG": "Atlético-MG",
+        "PAL": "Palmeiras", "Palmeiras": "Palmeiras",
+        "INT": "Internacional", "Internacional": "Internacional",
+        "CAP": "Athletico-PR", "Athletico-PR": "Athletico-PR",
+        "CFC": "Coritiba", "Coritiba": "Coritiba",
+        "RBB": "Bragantino", "BRA": "Bragantino", "Bragantino": "Bragantino",
+        "VIT": "Vitória", "Vitória": "Vitória",
+        "REM": "Remo", "Remo": "Remo",
+        "CHA": "Chapecoense", "Chapecoense": "Chapecoense",
+        "SAN": "Santos", "Santos": "Santos"
+    }
+    
+    for jogo in jogos_rodada:
+        time1_abrev = jogo.get("time1", "").strip()
+        time2_abrev = jogo.get("time2", "").strip()
+        
+        # Converte abreviações para nomes completos
+        time1 = abreviacoes.get(time1_abrev, time1_abrev)
+        time2 = abreviacoes.get(time2_abrev, time2_abrev)
+        
+        # Normaliza nomes (corrige encoding)
+        time1 = normalizar_nome_brasileiro(time1)
+        time2 = normalizar_nome_brasileiro(time2)
+        
+        print(f"   - Buscando H2H: {time1} vs {time2}")
+        
+        # Busca confrontos diretos entre os dois times
+        resultados_time1 = extrair_h2h_confronto_direto(time1, time2, debug=False)
+        pontos_h2h_time1 = calcular_pontos_h2h(resultados_time1)
+        
+        # Para o time2, inverte os resultados (V vira D, D vira V)
+        resultados_time2 = []
+        for res in resultados_time1:
+            if res == 'V':
+                resultados_time2.append('D')
+            elif res == 'D':
+                resultados_time2.append('V')
             else:
-                pontos_credito[time] = pontos_h2h
+                resultados_time2.append(res)  # 'E' ou '-' permanece igual
+        
+        pontos_h2h_time2 = calcular_pontos_h2h(resultados_time2)
+        
+        # Armazena os dados H2H
+        resultados_h2h[time1] = {
+            "resultados": resultados_time1,
+            "pontos": pontos_h2h_time1
+        }
+        
+        resultados_h2h[time2] = {
+            "resultados": resultados_time2,
+            "pontos": pontos_h2h_time2
+        }
+        
+        # Adiciona pontos H2H aos pontos de crédito totais
+        if time1 in pontos_credito:
+            pontos_credito[time1] += pontos_h2h_time1
+        if time2 in pontos_credito:
+            pontos_credito[time2] += pontos_h2h_time2
     
     # Analisa apostas baseado nos créditos
     apostas = analisar_apostas(jogos_rodada, pontos_credito)
