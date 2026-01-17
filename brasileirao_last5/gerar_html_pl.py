@@ -221,10 +221,10 @@ def gerar_html_premier_league():
             "team_id": team_id
         }
     
-    print(f"\n2. Dados coletados de {len(dados_times)} times")
+    print(f"\nDados coletados de {len(dados_times)} times")
     
     # 2. Calcular créditos para cada time
-    print("\n3. Calculando créditos...")
+    print("Calculando créditos...")
     for team_name in dados_times:
         creditos = calcular_creditos_time(
             team_name,
@@ -232,17 +232,14 @@ def gerar_html_premier_league():
             CLASSIFICACAO_ATUAL
         )
         dados_times[team_name]["creditos"] = creditos
-        print(f"   {team_name}: {creditos} créditos")
     
     # 3. Calcular dados H2H (confrontos diretos da próxima rodada)
-    print("\n4. Calculando H2H dos confrontos diretos da próxima rodada...")
+    print("Calculando H2H dos confrontos diretos...")
     h2h_dados = {}
     
     for jogo in PROXIMA_RODADA:
         home = jogo["time1"]
         away = jogo["time2"]
-        
-        print(f"   - Buscando H2H: {home} vs {away}")
         
         # Busca confrontos diretos entre os dois times
         resultados_home = extrair_h2h_confronto_direto(home, away, debug=False)
@@ -274,17 +271,14 @@ def gerar_html_premier_league():
         }
     
     # 3.5. Atualizar créditos totais com pontos H2H
-    print("\n4.5. Atualizando créditos totais (créditos gerais + H2H)...")
     for team_name in h2h_dados:
         if team_name in dados_times:
             creditos_gerais = dados_times[team_name]["creditos"]
             pontos_h2h = h2h_dados[team_name]["pontos"]
             creditos_totais = creditos_gerais + pontos_h2h
             dados_times[team_name]["creditos_totais"] = creditos_totais
-            print(f"   {team_name}: {creditos_gerais:.2f} + {pontos_h2h} H2H = {creditos_totais:.2f}")
     
     # 4. Analisar próxima rodada
-    print("\n5. Analisando próxima rodada...")
     analises_rodada = []
     
     for jogo in PROXIMA_RODADA:
@@ -311,17 +305,13 @@ def gerar_html_premier_league():
             (a["creditos_mandante"] > 0 if a["favorito"] == a["mandante"] else a["creditos_visitante"] > 0)]
     bets.sort(key=lambda x: x["diferenca"], reverse=True)
     
-    print(f"\n6. Encontradas {len(bets)} apostas recomendadas (diferença >= 2.0)")
-    
     # 6. Gerar HTML
-    print("\n7. Gerando HTML...")
     html = gerar_html_template(CLASSIFICACAO_ATUAL, analises_rodada, dados_times, bets, h2h_dados)
     
     # Salvar arquivo
     with open("premier_league_analysis.html", "w", encoding="utf-8") as f:
         f.write(html)
     
-    print("\n[OK] HTML gerado: premier_league_analysis.html")
     return html
 
 def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):

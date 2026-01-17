@@ -137,9 +137,6 @@ def extrair_h2h_confronto_direto(time_mandante, time_visitante, debug=False):
     # Busca confrontos diretos no ogol.com.br
     jogos_h2h = scrape_h2h_ogol(time_mandante, time_visitante, debug=debug)
     
-    if debug:
-        print(f"  Confronto {time_mandante} vs {time_visitante}: {len(jogos_h2h)} jogos encontrados")
-    
     for jogo in jogos_h2h[:5]:  # Até 5 jogos
         # O resultado vem no campo "texto", exemplo: "V 2025-11-05 São Paulo 2-2 Flamengo..."
         texto = jogo.get("texto", "").strip()
@@ -183,15 +180,6 @@ def calcular_pontos_h2h(resultados):
             jogos_validos += 1
     
     return round(pontos, 1)
-
-# FUNÇÕES ANTIGAS (não mais utilizadas - dados H2H agora são buscados diretamente via ogol_scraper)
-# def carregar_dados_h2h():
-#     """Carrega dados H2H do arquivo JSON gerado pelo gerar_h2h_ogol.py"""
-#     (função antiga removida - não mais necessária)
-
-# def processar_resultados_h2h(dados_h2h):
-#     """Processa os dados H2H do arquivo JSON"""
-#     (função antiga removida - não mais necessária)
 
 def calcular_bonus_classificacao(classificacao):
     """Adiciona pontos de crédito baseado na posição na classificação do campeonato."""
@@ -767,8 +755,6 @@ def main():
         time1 = normalizar_nome_brasileiro(time1)
         time2 = normalizar_nome_brasileiro(time2)
         
-        print(f"   - Buscando H2H: {time1} vs {time2}")
-        
         # Busca confrontos diretos entre os dois times
         resultados_time1 = extrair_h2h_confronto_direto(time1, time2, debug=False)
         pontos_h2h_time1 = calcular_pontos_h2h(resultados_time1)
@@ -809,7 +795,6 @@ def main():
     fname = "sofascore_result.html"
     with open(fname, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"Arquivo gerado: {fname}")
     # Tenta abrir no Firefox
     try:
         subprocess.Popen(["firefox", fname])
