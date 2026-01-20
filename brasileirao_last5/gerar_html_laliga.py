@@ -213,8 +213,12 @@ def gerar_html_laliga():
             continue
             
         jogos = scrape_sofascore_last5(team_id, team_name, debug=False)
+        
+        # Filtra apenas jogos de 2026 (formato da data: DD/MM/YY)
+        jogos_2026 = [j for j in jogos if j.get("startDate", "").endswith("/26")]
+        
         dados_times[team_name] = {
-            "ultimos_jogos": jogos,
+            "ultimos_jogos": jogos_2026,
             "team_id": team_id
         }
     

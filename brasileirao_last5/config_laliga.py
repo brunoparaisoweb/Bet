@@ -4,18 +4,18 @@ Configuração manual para LaLiga 2025/2026
 Próxima rodada e classificação atual
 """
 
-# Próxima rodada da LaLiga (Rodada 20 - atualizar conforme necessário)
+# Próxima rodada da LaLiga (Rodada 21 - atualizar conforme necessário)
 PROXIMA_RODADA = [
-    {"time1": "Espanyol", "time2": "Girona", "data": "18/01/26 10:00"},
-    {"time1": "Real Madrid", "time2": "Levante", "data": "18/01/26 12:15"},
-    {"time1": "Mallorca", "time2": "Athletic Club", "data": "18/01/26 14:30"},
-    {"time1": "Osasuna", "time2": "Real Oviedo", "data": "18/01/26 17:00"},
-    {"time1": "Real Betis", "time2": "Villarreal", "data": "19/01/26 10:00"},
-    {"time1": "Getafe", "time2": "Valencia", "data": "19/01/26 12:15"},
-    {"time1": "Atlético Madrid", "time2": "Alavés", "data": "19/01/26 14:30"},
-    {"time1": "Celta", "time2": "Rayo Vallecano", "data": "19/01/26 17:00"},
-    {"time1": "Real Sociedad", "time2": "Barcelona", "data": "19/01/26 19:00"},
-    {"time1": "Elche", "time2": "Sevilla", "data": "19/01/26 21:00"}
+    {"time1": "Levante", "time2": "Elche", "data": "23/01/26 17:00"},
+    {"time1": "Rayo Vallecano", "time2": "Osasuna", "data": "24/01/26 10:00"},
+    {"time1": "Valencia", "time2": "Espanyol", "data": "24/01/26 12:15"},
+    {"time1": "Sevilla", "time2": "Athletic Club", "data": "24/01/26 14:30"},
+    {"time1": "Villarreal", "time2": "Real Madrid", "data": "24/01/26 17:00"},
+    {"time1": "Atlético Madrid", "time2": "Mallorca", "data": "25/01/26 10:00"},
+    {"time1": "Barcelona", "time2": "Real Oviedo", "data": "25/01/26 12:15"},
+    {"time1": "Real Sociedad", "time2": "Celta", "data": "25/01/26 14:30"},
+    {"time1": "Alavés", "time2": "Real Betis", "data": "25/01/26 17:00"},
+    {"time1": "Girona", "time2": "Getafe", "data": "26/01/26 17:00"}
 ]
 
 # Classificação atual da LaLiga (atualizar após cada rodada)

@@ -2,16 +2,16 @@
 # Edite este arquivo com os dados da próxima rodada
 
 PROXIMA_RODADA = [
-    {"data": "17/01/26 - 09:30", "time1": "Manchester United", "time2": "Manchester City"},
-    {"data": "17/01/26 - 12:00", "time1": "Chelsea", "time2": "Brentford"},
-    {"data": "17/01/26 - 12:00", "time1": "Leeds United", "time2": "Fulham"},
-    {"data": "17/01/26 - 12:00", "time1": "Liverpool", "time2": "Burnley"},
-    {"data": "17/01/26 - 12:00", "time1": "Sunderland", "time2": "Crystal Palace"},
-    {"data": "17/01/26 - 12:00", "time1": "Tottenham", "time2": "West Ham"},
-    {"data": "17/01/26 - 14:30", "time1": "Nottingham Forest", "time2": "Arsenal"},
-    {"data": "18/01/26 - 11:00", "time1": "Wolverhampton", "time2": "Newcastle"},
-    {"data": "18/01/26 - 13:30", "time1": "Aston Villa", "time2": "Everton"},
-    {"data": "19/01/26 - 17:00", "time1": "Brighton", "time2": "Bournemouth"},
+    {"data": "24/01/26 - 09:30", "time1": "West Ham", "time2": "Sunderland"},
+    {"data": "24/01/26 - 12:00", "time1": "Burnley", "time2": "Tottenham"},
+    {"data": "24/01/26 - 12:00", "time1": "Fulham", "time2": "Brighton"},
+    {"data": "24/01/26 - 12:00", "time1": "Manchester City", "time2": "Wolverhampton"},
+    {"data": "24/01/26 - 14:30", "time1": "Bournemouth", "time2": "Liverpool"},
+    {"data": "25/01/26 - 11:00", "time1": "Brentford", "time2": "Nottingham Forest"},
+    {"data": "25/01/26 - 11:00", "time1": "Crystal Palace", "time2": "Chelsea"},
+    {"data": "25/01/26 - 11:00", "time1": "Newcastle", "time2": "Aston Villa"},
+    {"data": "25/01/26 - 13:30", "time1": "Arsenal", "time2": "Manchester United"},
+    {"data": "26/01/26 - 17:00", "time1": "Everton", "time2": "Leeds United"},
 ]
 
 # Classificação atual (edite com os dados reais)
