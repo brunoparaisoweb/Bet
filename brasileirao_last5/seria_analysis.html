@@ -1,0 +1,617 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serie A 2025/2026 - Análise</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0 0 20px 0;
+            background: #f7f7f7;
+            display: flex;
+        }
+        .sidebar {
+            width: 220px;
+            padding: 10px;
+            background: #fff;
+            box-shadow: 2px 0 8px #0001;
+            font-size: 0.75em;
+        }
+        .main-content {
+            flex: 1;
+            padding: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .sidebar-right {
+            width: 250px;
+            padding: 15px;
+            background: #fff;
+            box-shadow: -2px 0 8px #0001;
+            font-size: 0.9em;
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #37003c;
+            color: #fff;
+            text-align: center;
+            padding: 4px 0;
+            font-size: 9px;
+            z-index: 1000;
+        }
+        .time-section {
+            width: 18%;
+            min-width: 180px;
+            margin: 5px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            font-size: 0.9em;
+            margin: 5px 0;
+            width: 100%;
+        }
+        h2 {
+            color: #d00;
+            text-align: center;
+            margin: 8px 0 5px 0;
+            font-size: 0.75em;
+        }
+        h3 {
+            color: #333;
+            font-size: 0.9em;
+            margin: 8px 0 4px 0;
+        }
+        table {
+            border-collapse: collapse;
+            margin: 5px auto;
+            background: #fff;
+            box-shadow: 0 1px 4px #0001;
+            font-size: 0.65em;
+            width: 100%;
+        }
+        th, td {
+            padding: 3px 5px;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-size: 0.85em;
+        }
+        th {
+            background: #37003c;
+            color: #fff;
+        }
+        .vitoria {
+            background: #4CAF50 !important;
+            color: #fff;
+        }
+        .derrota {
+            background: #f44336 !important;
+            color: #fff;
+        }
+        .empate {
+            background: #9e9e9e !important;
+            color: #fff;
+        }
+        .jogo-rodada {
+            font-size: 0.75em;
+            padding: 3px 2px;
+            border-bottom: 1px solid #eee;
+            line-height: 1.3;
+        }
+        .jogo-rodada:last-child {
+            border-bottom: none;
+        }
+        .match-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+            width: 18%;
+            min-width: 180px;
+            margin: 5px;
+        }
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .match-teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 11px;
+        }
+        .team {
+            flex: 1;
+            font-weight: 600;
+        }
+        .team.away {
+            text-align: right;
+        }
+        .vs {
+            padding: 0 10px;
+            color: #999;
+            font-size: 9px;
+        }
+        .credits {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #666;
+            margin-top: 6px;
+        }
+        .favorito {
+            background: #e7f3ff;
+            border-left: 3px solid #2196F3;
+        }
+        .bet-high {
+            background: #fff3cd;
+            border-left: 3px solid #ff9800;
+        }
+        .bet-item {
+            padding: 4px 6px;
+            margin-bottom: 4px;
+            background: #f8f9fa;
+            border-radius: 3px;
+            border-left: 2px solid #28a745;
+        }
+        .bet-time {
+            font-weight: 600;
+            color: #28a745;
+            font-size: 10px;
+        }
+        .bet-diff {
+            font-size: 9px;
+            color: #666;
+            margin-top: 1px;
+        }
+        .bet-matchup {
+            font-size: 8px;
+            color: #888;
+            margin-top: 1px;
+        }
+        .pos {
+            display: inline-block;
+            width: 22px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .h2h-table {
+            width: 100%;
+            font-size: 0.68em;
+            margin-top: 5px;
+        }
+        .h2h-table th {
+            background: #37003c;
+            color: #fff;
+            padding: 2px 1px;
+            font-size: 0.8em;
+        }
+        .h2h-table td {
+            padding: 2px 1px;
+            text-align: center;
+        }
+        .h2h-table td:first-child {
+            text-align: left;
+            padding-left: 5px;
+        }
+        .h2h-vitoria {
+            background: #4CAF50 !important;
+            color: #fff;
+            font-weight: bold;
+        }
+        .h2h-empate {
+            background: #9e9e9e !important;
+            color: #fff;
+            font-weight: bold;
+        }
+        .h2h-derrota {
+            background: #f44336 !important;
+            color: #fff;
+            font-weight: bold;
+        }
+        .times-table {
+            width: 100%;
+            font-size: 0.85em;
+        }
+        .times-table td {
+            text-align: left;
+            padding: 5px 8px;
+        }
+        .times-table td:last-child {
+            text-align: center;
+            font-weight: bold;
+        }
+        .top3 {
+            background: #FFD700 !important;
+        }
+        .negativo {
+            background: #ff6b6b !important;
+            color: #fff;
+        }
+        .aviso-box {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff3cd;
+            border: 2px solid #ff9800;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 11px;
+            color: #856404;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 999;
+            max-width: 600px;
+            text-align: center;
+        }
+        .aviso-box strong {
+            color: #37003c;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Esquerda: Próxima Rodada -->
+    <div class="sidebar">
+        <h3>Próxima Rodada - Serie A</h3>
+        <div class="jogo-rodada">23/01 - INT x Pisa</div>
+        <div class="jogo-rodada">24/01 - Como x Torino</div>
+        <div class="jogo-rodada">24/01 - Fiorentina x Cagliari</div>
+        <div class="jogo-rodada">24/01 - Lecce x Lazio</div>
+        <div class="jogo-rodada">25/01 - Sassuolo x Cremonese</div>
+        <div class="jogo-rodada">25/01 - Atalanta x Parma</div>
+        <div class="jogo-rodada">25/01 - Genoa x Bologna</div>
+        <div class="jogo-rodada">25/01 - Juventus x Napoli</div>
+        <div class="jogo-rodada">25/01 - Roma x Milan</div>
+        <div class="jogo-rodada">26/01 - HEL x Udinese</div>
+
+        <h3 style="margin-top: 12px;">Classificação</h3>
+        <table style="width: 100%; font-size: 0.7em;">
+            <tr><th style="padding: 2px;">Pos</th><th>Time</th><th>Pts</th><th>J</th></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">1</td><td style="text-align: left; padding: 1px 2px;">Internazionale</td><td style="text-align: center; padding: 1px 2px;">49</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">2</td><td style="text-align: left; padding: 1px 2px;">Milan</td><td style="text-align: center; padding: 1px 2px;">46</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">3</td><td style="text-align: left; padding: 1px 2px;">Napoli</td><td style="text-align: center; padding: 1px 2px;">43</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">4</td><td style="text-align: left; padding: 1px 2px;">Roma</td><td style="text-align: center; padding: 1px 2px;">42</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">5</td><td style="text-align: left; padding: 1px 2px;">Juventus</td><td style="text-align: center; padding: 1px 2px;">39</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">6</td><td style="text-align: left; padding: 1px 2px;">Como</td><td style="text-align: center; padding: 1px 2px;">37</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">7</td><td style="text-align: left; padding: 1px 2px;">Atalanta</td><td style="text-align: center; padding: 1px 2px;">32</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">8</td><td style="text-align: left; padding: 1px 2px;">Bologna</td><td style="text-align: center; padding: 1px 2px;">30</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">9</td><td style="text-align: left; padding: 1px 2px;">Lazio</td><td style="text-align: center; padding: 1px 2px;">28</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">10</td><td style="text-align: left; padding: 1px 2px;">Udinese</td><td style="text-align: center; padding: 1px 2px;">26</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">11</td><td style="text-align: left; padding: 1px 2px;">Sassuolo</td><td style="text-align: center; padding: 1px 2px;">23</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">12</td><td style="text-align: left; padding: 1px 2px;">Cremonese</td><td style="text-align: center; padding: 1px 2px;">23</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">13</td><td style="text-align: left; padding: 1px 2px;">Parma</td><td style="text-align: center; padding: 1px 2px;">23</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">14</td><td style="text-align: left; padding: 1px 2px;">Torino</td><td style="text-align: center; padding: 1px 2px;">23</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">15</td><td style="text-align: left; padding: 1px 2px;">Cagliari</td><td style="text-align: center; padding: 1px 2px;">22</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">16</td><td style="text-align: left; padding: 1px 2px;">Genoa</td><td style="text-align: center; padding: 1px 2px;">20</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">17</td><td style="text-align: left; padding: 1px 2px;">Fiorentina</td><td style="text-align: center; padding: 1px 2px;">17</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">18</td><td style="text-align: left; padding: 1px 2px;">Lecce</td><td style="text-align: center; padding: 1px 2px;">17</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">19</td><td style="text-align: left; padding: 1px 2px;">Pisa</td><td style="text-align: center; padding: 1px 2px;">14</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+            <tr><td style="text-align: center; padding: 1px 2px;">20</td><td style="text-align: left; padding: 1px 2px;">Hellas Verona</td><td style="text-align: center; padding: 1px 2px;">14</td><td style="text-align: center; padding: 1px 2px;">21</td></tr>
+        </table>
+
+        <h3 style="margin-top: 10px;">Créditos confronto direto</h3>
+        <table class="h2h-table">
+            <tr><th>Time</th><th>vs</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Pts</th></tr>
+            <tr><td>Atalanta</td><td style="font-size: 9px; color: #666;">PAR</td><td class="h2h-empate">E</td><td class="h2h-derrota">D</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td style="font-weight: bold; background: #FFE4B5;">0.5</td></tr>
+            <tr><td>Bologna</td><td style="font-size: 9px; color: #666;">GEN</td><td class="h2h-vitoria">V</td><td class="h2h-derrota">D</td><td class="h2h-empate">E</td><td class="h2h-derrota">D</td><td class="h2h-empate">E</td><td style="font-weight: bold; background: #FFE4B5;">-0.5</td></tr>
+            <tr><td>Cagliari</td><td style="font-size: 9px; color: #666;">FIO</td><td class="h2h-empate">E</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td style="font-weight: bold; background: #FFE4B5;">-1.3</td></tr>
+            <tr><td>Como</td><td style="font-size: 9px; color: #666;">TOR</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td style="font-weight: bold; background: #FFE4B5;">-0.3</td></tr>
+            <tr><td>Cremonese</td><td style="font-size: 9px; color: #666;">SAS</td><td class="h2h-vitoria">V</td><td class="h2h-empate">E</td><td class="h2h-vitoria">V</td><td class="h2h-derrota">D</td><td class="h2h-empate">E</td><td style="font-weight: bold; background: #FFE4B5;">0.1</td></tr>
+            <tr><td>Fiorentina</td><td style="font-size: 9px; color: #666;">CAG</td><td class="h2h-empate">E</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td style="font-weight: bold; background: #FFE4B5;">1.1</td></tr>
+            <tr><td>Genoa</td><td style="font-size: 9px; color: #666;">BOL</td><td class="h2h-derrota">D</td><td class="h2h-vitoria">V</td><td class="h2h-empate">E</td><td class="h2h-vitoria">V</td><td class="h2h-empate">E</td><td style="font-weight: bold; background: #FFE4B5;">0.1</td></tr>
+            <tr><td>Hellas Ver.</td><td style="font-size: 9px; color: #666;">UDI</td><td class="h2h-empate">E</td><td class="h2h-vitoria">V</td><td class="h2h-empate">E</td><td class="h2h-vitoria">V</td><td class="h2h-empate">E</td><td style="font-weight: bold; background: #FFE4B5;">0.3</td></tr>
+            <tr><td>Internazio.</td><td style="font-size: 9px; color: #666;">PIS</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td style="font-weight: bold; background: #FFE4B5;">1.5</td></tr>
+            <tr><td>Juventus</td><td style="font-size: 9px; color: #666;">NAP</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td class="h2h-empate">E</td><td class="h2h-derrota">D</td><td class="h2h-vitoria">V</td><td style="font-weight: bold; background: #FFE4B5;">-0.7</td></tr>
+            <tr><td>Lazio</td><td style="font-size: 9px; color: #666;">LEC</td><td class="h2h-vitoria">V</td><td class="h2h-derrota">D</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td class="h2h-derrota">D</td><td style="font-weight: bold; background: #FFE4B5;">0.3</td></tr>
+            <tr><td>Lecce</td><td style="font-size: 9px; color: #666;">LAZ</td><td class="h2h-derrota">D</td><td class="h2h-vitoria">V</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td class="h2h-vitoria">V</td><td style="font-weight: bold; background: #FFE4B5;">-0.3</td></tr>
+            <tr><td>Milan</td><td style="font-size: 9px; color: #666;">ROM</td><td class="h2h-vitoria">V</td><td class="h2h-derrota">D</td><td class="h2h-vitoria">V</td><td class="h2h-empate">E</td><td class="h2h-derrota">D</td><td style="font-weight: bold; background: #FFE4B5;">-0.1</td></tr>
+            <tr><td>Napoli</td><td style="font-size: 9px; color: #666;">JUV</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td class="h2h-empate">E</td><td class="h2h-vitoria">V</td><td class="h2h-derrota">D</td><td style="font-weight: bold; background: #FFE4B5;">0.5</td></tr>
+            <tr><td>Parma</td><td style="font-size: 9px; color: #666;">ATA</td><td class="h2h-empate">E</td><td class="h2h-vitoria">V</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td style="font-weight: bold; background: #FFE4B5;">-0.7</td></tr>
+            <tr><td>Pisa</td><td style="font-size: 9px; color: #666;">INT</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td style="font-weight: bold; background: #FFE4B5;">-1.5</td></tr>
+            <tr><td>Roma</td><td style="font-size: 9px; color: #666;">MIL</td><td class="h2h-derrota">D</td><td class="h2h-vitoria">V</td><td class="h2h-derrota">D</td><td class="h2h-empate">E</td><td class="h2h-vitoria">V</td><td style="font-weight: bold; background: #FFE4B5;">-0.1</td></tr>
+            <tr><td>Sassuolo</td><td style="font-size: 9px; color: #666;">CRE</td><td class="h2h-derrota">D</td><td class="h2h-empate">E</td><td class="h2h-derrota">D</td><td class="h2h-vitoria">V</td><td class="h2h-empate">E</td><td style="font-weight: bold; background: #FFE4B5;">-0.5</td></tr>
+            <tr><td>Torino</td><td style="font-size: 9px; color: #666;">COM</td><td class="h2h-derrota">D</td><td class="h2h-derrota">D</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td class="h2h-vitoria">V</td><td style="font-weight: bold; background: #FFE4B5;">0.3</td></tr>
+            <tr><td>Udinese</td><td style="font-size: 9px; color: #666;">HEL</td><td class="h2h-empate">E</td><td class="h2h-derrota">D</td><td class="h2h-empate">E</td><td class="h2h-derrota">D</td><td class="h2h-empate">E</td><td style="font-weight: bold; background: #FFE4B5;">-0.9</td></tr>
+        </table>
+    </div>
+    
+    <!-- Conteúdo Principal: Últimos 5 Jogos de Cada Time -->
+    <div class="main-content">
+        <h1>Serie A 2025/2026</h1>
+    <div class="time-section">
+    <h2>Atalanta</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="empate"><td>16/01/26</td><td>Pisa</td><td>Atalanta</td><td>1 x 1</td></tr>
+        <tr class="vitoria"><td>10/01/26</td><td>Atalanta</td><td>Torino</td><td>2 x 0</td></tr>
+        <tr class="vitoria"><td>07/01/26</td><td>Bologna</td><td>Atalanta</td><td>0 x 2</td></tr>
+        <tr class="vitoria"><td>03/01/26</td><td>Atalanta</td><td>Roma</td><td>1 x 0</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Bologna</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="derrota"><td>18/01/26</td><td>Bologna</td><td>Fiorentina</td><td>1 x 2</td></tr>
+        <tr class="vitoria"><td>15/01/26</td><td>Verona</td><td>Bologna</td><td>2 x 3</td></tr>
+        <tr class="empate"><td>10/01/26</td><td>Como</td><td>Bologna</td><td>1 x 1</td></tr>
+        <tr class="derrota"><td>07/01/26</td><td>Bologna</td><td>Atalanta</td><td>0 x 2</td></tr>
+        <tr class="derrota"><td>04/01/26</td><td>Inter</td><td>Bologna</td><td>3 x 1</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Cagliari</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="vitoria"><td>17/01/26</td><td>Cagliari</td><td>Juventus</td><td>1 x 0</td></tr>
+        <tr class="derrota"><td>12/01/26</td><td>Genoa</td><td>Cagliari</td><td>3 x 0</td></tr>
+        <tr class="empate"><td>08/01/26</td><td>Cremonese</td><td>Cagliari</td><td>2 x 2</td></tr>
+        <tr class="derrota"><td>02/01/26</td><td>Cagliari</td><td>Milan</td><td>0 x 1</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Como</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="vitoria"><td>19/01/26</td><td>Lazio</td><td>Como</td><td>0 x 3</td></tr>
+        <tr class="derrota"><td>15/01/26</td><td>Como</td><td>Milan</td><td>1 x 3</td></tr>
+        <tr class="empate"><td>10/01/26</td><td>Como</td><td>Bologna</td><td>1 x 1</td></tr>
+        <tr class="vitoria"><td>06/01/26</td><td>Pisa</td><td>Como</td><td>0 x 3</td></tr>
+        <tr class="vitoria"><td>03/01/26</td><td>Como</td><td>Udinese</td><td>1 x 0</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Cremonese</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="empate"><td>19/01/26</td><td>Cremonese</td><td>Verona</td><td>0 x 0</td></tr>
+        <tr class="derrota"><td>12/01/26</td><td>Juventus</td><td>Cremonese</td><td>5 x 0</td></tr>
+        <tr class="empate"><td>08/01/26</td><td>Cremonese</td><td>Cagliari</td><td>2 x 2</td></tr>
+        <tr class="derrota"><td>04/01/26</td><td>Fiorentina</td><td>Cremonese</td><td>1 x 0</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Fiorentina</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="vitoria"><td>18/01/26</td><td>Bologna</td><td>Fiorentina</td><td>1 x 2</td></tr>
+        <tr class="empate"><td>11/01/26</td><td>Fiorentina</td><td>Milan</td><td>1 x 1</td></tr>
+        <tr class="empate"><td>07/01/26</td><td>Lazio</td><td>Fiorentina</td><td>2 x 2</td></tr>
+        <tr class="vitoria"><td>04/01/26</td><td>Fiorentina</td><td>Cremonese</td><td>1 x 0</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Genoa</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="empate"><td>18/01/26</td><td>Parma</td><td>Genoa</td><td>0 x 0</td></tr>
+        <tr class="vitoria"><td>12/01/26</td><td>Genoa</td><td>Cagliari</td><td>3 x 0</td></tr>
+        <tr class="empate"><td>08/01/26</td><td>Milan</td><td>Genoa</td><td>1 x 1</td></tr>
+        <tr class="empate"><td>03/01/26</td><td>Genoa</td><td>Pisa</td><td>1 x 1</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Hellas Verona</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="empate"><td>19/01/26</td><td>Cremonese</td><td>Verona</td><td>0 x 0</td></tr>
+        <tr class="derrota"><td>15/01/26</td><td>Verona</td><td>Bologna</td><td>2 x 3</td></tr>
+        <tr class="derrota"><td>11/01/26</td><td>Verona</td><td>Lazio</td><td>0 x 1</td></tr>
+        <tr class="empate"><td>07/01/26</td><td>Napoli</td><td>Verona</td><td>2 x 2</td></tr>
+        <tr class="derrota"><td>04/01/26</td><td>Verona</td><td>Torino</td><td>0 x 3</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Internazionale</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="vitoria"><td>17/01/26</td><td>Udinese</td><td>Inter</td><td>0 x 1</td></tr>
+        <tr class="vitoria"><td>14/01/26</td><td>Inter</td><td>Lecce</td><td>1 x 0</td></tr>
+        <tr class="empate"><td>11/01/26</td><td>Inter</td><td>Napoli</td><td>2 x 2</td></tr>
+        <tr class="vitoria"><td>07/01/26</td><td>Parma</td><td>Inter</td><td>0 x 2</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Juventus</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="derrota"><td>17/01/26</td><td>Cagliari</td><td>Juventus</td><td>1 x 0</td></tr>
+        <tr class="vitoria"><td>12/01/26</td><td>Juventus</td><td>Cremonese</td><td>5 x 0</td></tr>
+        <tr class="vitoria"><td>06/01/26</td><td>Sassuolo</td><td>Juventus</td><td>0 x 3</td></tr>
+        <tr class="empate"><td>03/01/26</td><td>Juventus</td><td>Lecce</td><td>1 x 1</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Lazio</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="derrota"><td>19/01/26</td><td>Lazio</td><td>Como</td><td>0 x 3</td></tr>
+        <tr class="vitoria"><td>11/01/26</td><td>Verona</td><td>Lazio</td><td>0 x 1</td></tr>
+        <tr class="empate"><td>07/01/26</td><td>Lazio</td><td>Fiorentina</td><td>2 x 2</td></tr>
+        <tr class="derrota"><td>04/01/26</td><td>Laziox2</td><td>Napoli</td><td>0 x 2</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Lecce</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="derrota"><td>18/01/26</td><td>Milan</td><td>Lecce</td><td>1 x 0</td></tr>
+        <tr class="derrota"><td>14/01/26</td><td>Inter</td><td>Lecce</td><td>1 x 0</td></tr>
+        <tr class="derrota"><td>11/01/26</td><td>Leccex2</td><td>Parma</td><td>1 x 2</td></tr>
+        <tr class="derrota"><td>06/01/26</td><td>Lecce</td><td>Roma</td><td>0 x 2</td></tr>
+        <tr class="empate"><td>03/01/26</td><td>Juventus</td><td>Lecce</td><td>1 x 1</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Milan</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="vitoria"><td>18/01/26</td><td>Milan</td><td>Lecce</td><td>1 x 0</td></tr>
+        <tr class="vitoria"><td>15/01/26</td><td>Como</td><td>Milan</td><td>1 x 3</td></tr>
+        <tr class="empate"><td>11/01/26</td><td>Fiorentina</td><td>Milan</td><td>1 x 1</td></tr>
+        <tr class="empate"><td>08/01/26</td><td>Milan</td><td>Genoa</td><td>1 x 1</td></tr>
+        <tr class="vitoria"><td>02/01/26</td><td>Cagliari</td><td>Milan</td><td>0 x 1</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Napoli</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="vitoria"><td>17/01/26</td><td>Napoli</td><td>Sassuolo</td><td>1 x 0</td></tr>
+        <tr class="empate"><td>14/01/26</td><td>Napoli</td><td>Parma</td><td>0 x 0</td></tr>
+        <tr class="empate"><td>11/01/26</td><td>Inter</td><td>Napoli</td><td>2 x 2</td></tr>
+        <tr class="empate"><td>07/01/26</td><td>Napoli</td><td>Verona</td><td>2 x 2</td></tr>
+        <tr class="vitoria"><td>04/01/26</td><td>Laziox2</td><td>Napoli</td><td>0 x 2</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Parma</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="empate"><td>18/01/26</td><td>Parma</td><td>Genoa</td><td>0 x 0</td></tr>
+        <tr class="empate"><td>14/01/26</td><td>Napoli</td><td>Parma</td><td>0 x 0</td></tr>
+        <tr class="vitoria"><td>11/01/26</td><td>Leccex2</td><td>Parma</td><td>1 x 2</td></tr>
+        <tr class="derrota"><td>07/01/26</td><td>Parma</td><td>Inter</td><td>0 x 2</td></tr>
+        <tr class="empate"><td>03/01/26</td><td>Sassuolo</td><td>Parma</td><td>1 x 1</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Pisa</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="empate"><td>16/01/26</td><td>Pisa</td><td>Atalanta</td><td>1 x 1</td></tr>
+        <tr class="empate"><td>10/01/26</td><td>Udinese</td><td>Pisa</td><td>2 x 2</td></tr>
+        <tr class="derrota"><td>06/01/26</td><td>Pisa</td><td>Como</td><td>0 x 3</td></tr>
+        <tr class="empate"><td>03/01/26</td><td>Genoa</td><td>Pisa</td><td>1 x 1</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Roma</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="vitoria"><td>18/01/26</td><td>Torino</td><td>Roma</td><td>0 x 2</td></tr>
+        <tr class="derrota"><td>13/01/26</td><td>Roma</td><td>Torino</td><td>2 x 3</td></tr>
+        <tr class="vitoria"><td>10/01/26</td><td>Roma</td><td>Sassuolo</td><td>2 x 0</td></tr>
+        <tr class="vitoria"><td>06/01/26</td><td>Lecce</td><td>Roma</td><td>0 x 2</td></tr>
+        <tr class="derrota"><td>03/01/26</td><td>Atalanta</td><td>Roma</td><td>1 x 0</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Sassuolo</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="derrota"><td>17/01/26</td><td>Napoli</td><td>Sassuolo</td><td>1 x 0</td></tr>
+        <tr class="derrota"><td>10/01/26</td><td>Roma</td><td>Sassuolo</td><td>2 x 0</td></tr>
+        <tr class="derrota"><td>06/01/26</td><td>Sassuolo</td><td>Juventus</td><td>0 x 3</td></tr>
+        <tr class="empate"><td>03/01/26</td><td>Sassuolo</td><td>Parma</td><td>1 x 1</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Torino</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="derrota"><td>18/01/26</td><td>Torino</td><td>Roma</td><td>0 x 2</td></tr>
+        <tr class="vitoria"><td>13/01/26</td><td>Roma</td><td>Torino</td><td>2 x 3</td></tr>
+        <tr class="derrota"><td>10/01/26</td><td>Atalanta</td><td>Torino</td><td>2 x 0</td></tr>
+        <tr class="derrota"><td>07/01/26</td><td>Torino</td><td>Udinese</td><td>1 x 2</td></tr>
+        <tr class="vitoria"><td>04/01/26</td><td>Verona</td><td>Torino</td><td>0 x 3</td></tr>
+    </table>
+    </div>
+    <div class="time-section">
+    <h2>Udinese</h2>
+    <table>
+        <tr><th>Data</th><th>Mandante</th><th>Visitante</th><th>Placar</th></tr>
+        <tr class="derrota"><td>17/01/26</td><td>Udinese</td><td>Inter</td><td>0 x 1</td></tr>
+        <tr class="empate"><td>10/01/26</td><td>Udinese</td><td>Pisa</td><td>2 x 2</td></tr>
+        <tr class="vitoria"><td>07/01/26</td><td>Torino</td><td>Udinese</td><td>1 x 2</td></tr>
+        <tr class="derrota"><td>03/01/26</td><td>Como</td><td>Udinese</td><td>1 x 0</td></tr>
+    </table>
+    </div>
+    </div>
+    
+    <!-- Sidebar Direita: Pontos de Crédito e BETs -->
+    <div class="sidebar-right">
+        <h3>Times da Serie A</h3>
+        <table class="times-table">
+            <tr><th>Time</th><th>Créditos Totais</th></tr>
+            <tr class="top3"><td>Internazionale</td><td>6.50</td></tr>
+            <tr class="top3"><td>Milan</td><td>5.20</td></tr>
+            <tr class="top3"><td>Napoli</td><td>4.85</td></tr>
+            <tr class=""><td>Atalanta</td><td>4.30</td></tr>
+            <tr class=""><td>Como</td><td>2.70</td></tr>
+            <tr class=""><td>Fiorentina</td><td>2.40</td></tr>
+            <tr class=""><td>Roma</td><td>2.30</td></tr>
+            <tr class=""><td>Juventus</td><td>1.75</td></tr>
+            <tr class=""><td>Genoa</td><td>1.10</td></tr>
+            <tr class=""><td>Parma</td><td>0.15</td></tr>
+            <tr class="negativo"><td>Lazio</td><td>-0.05</td></tr>
+            <tr class="negativo"><td>Torino</td><td>-1.05</td></tr>
+            <tr class="negativo"><td>Cremonese</td><td>-1.10</td></tr>
+            <tr class="negativo"><td>Bologna</td><td>-1.15</td></tr>
+            <tr class="negativo"><td>Udinese</td><td>-1.20</td></tr>
+            <tr class="negativo"><td>Cagliari</td><td>-2.60</td></tr>
+            <tr class="negativo"><td>Sassuolo</td><td>-2.75</td></tr>
+            <tr class="negativo"><td>Pisa</td><td>-2.85</td></tr>
+            <tr class="negativo"><td>Hellas Verona</td><td>-3.50</td></tr>
+            <tr class="negativo"><td>Lecce</td><td>-4.70</td></tr>
+        </table>
+
+        <h3 style="margin-top: 12px; color: #d00; font-size: 0.85em;">BETs Recomendadas</h3>
+        <div class="bet-item">
+            <div class="bet-time">Internazionale</div>
+            <div class="bet-matchup">Internaziona. vs Pisa</div>
+            <div class="bet-diff">Dif: 9.3</div>
+        </div>
+        <div class="bet-item">
+            <div class="bet-time">Fiorentina</div>
+            <div class="bet-matchup">Fiorentina vs Cagliari</div>
+            <div class="bet-diff">Dif: 5.0</div>
+        </div>
+        <div class="bet-item">
+            <div class="bet-time">Atalanta</div>
+            <div class="bet-matchup">Atalanta vs Parma</div>
+            <div class="bet-diff">Dif: 4.1</div>
+        </div>
+        <div class="bet-item">
+            <div class="bet-time">Como</div>
+            <div class="bet-matchup">Como vs Torino</div>
+            <div class="bet-diff">Dif: 3.8</div>
+        </div>
+        <div class="bet-item">
+            <div class="bet-time">Napoli</div>
+            <div class="bet-matchup">Juventus vs Napoli</div>
+            <div class="bet-diff">Dif: 3.1</div>
+        </div>
+        <div class="bet-item">
+            <div class="bet-time">Milan</div>
+            <div class="bet-matchup">Roma vs Milan</div>
+            <div class="bet-diff">Dif: 2.9</div>
+        </div>
+        <div class="bet-item">
+            <div class="bet-time">Genoa</div>
+            <div class="bet-matchup">Genoa vs Bologna</div>
+            <div class="bet-diff">Dif: 2.2</div>
+        </div>
+    </div>
+    <div class="aviso-box">
+        <strong>⚠️ ATENÇÃO</strong>
+        Atentar ao encerramento da temporada. Atualizar: - ID e NOME dos novos times; - Atualizar as TABELAS
+    </div>
+    <footer>Development for Bruno Paraiso - 2026 | Todos os direitos reservados</footer>
+</body>
+</html>
