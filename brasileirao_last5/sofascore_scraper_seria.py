@@ -104,13 +104,25 @@ def scrape_sofascore_seria_last5(team_id, team_name, debug=False, click_navigati
                     is_europa_league = 'unique-tournament/679/image' in card_html
                     is_conference_league = 'unique-tournament/8097/image' in card_html
                     
+                    # Verifica também por texto
+                    card_text = card.inner_text()
+                    card_text_lower = card_text.lower() if card_text else ""
+                    is_coppa_by_text = 'coppa italia' in card_text_lower
+                    is_supercoppa_by_text = 'supercoppa' in card_text_lower
+                    is_champions_by_text = any(x in card_text_lower for x in ['champions league', 'liga dos campeões'])
+                    is_europa_by_text = 'europa league' in card_text_lower
+                    is_conference_by_text = 'conference league' in card_text_lower
+                    
                     if debug and card_idx < 10:
-                        card_text = card.inner_text()
                         first_line = card_text.split('\n')[0] if card_text else ""
-                        print(f"Card {card_idx}: SerieA={is_premier_league}, Coppa={is_coppa_italia}, Supercoppa={is_supercoppa}, UCL={is_champions_league}, first_line={repr(first_line[:50])}")
+                        print(f"Card {card_idx}: SerieA={is_premier_league}, Coppa={is_coppa_italia}/{is_coppa_by_text}, Supercoppa={is_supercoppa}/{is_supercoppa_by_text}, UCL={is_champions_league}/{is_champions_by_text}, first_line={repr(first_line[:50])}")
                     
                     # Ignora Coppa Italia, Supercoppa e competições europeias - processa apenas Serie A
-                    if is_fa_cup or is_efl_cup or is_coppa_italia or is_supercoppa or is_champions_league or is_europa_league or is_conference_league:
+                    if (is_fa_cup or is_efl_cup or is_coppa_italia or is_coppa_by_text or 
+                        is_supercoppa or is_supercoppa_by_text or 
+                        is_champions_league or is_champions_by_text or 
+                        is_europa_league or is_europa_by_text or 
+                        is_conference_league or is_conference_by_text):
                         if debug:
                             print(f"Debug: Skipping card {card_idx} (Coppa Italia, Supercoppa ou competições europeias)")
                         continue
