@@ -72,7 +72,7 @@ def normalizar_nome_time(nome):
         "Marseille": ["Olympique de Marselha", "Marseille", "Olympique Marseille"],
         "Monaco": ["Monaco", "AS Monaco", "AS Monaco FC"],
         "AS Monaco": ["Monaco", "AS Monaco", "AS Monaco FC"],
-        "Paris FC": ["Paris FC", "Paris", "PFC"],
+        "Paris FC": ["Paris FC", "Paris", "PFC"],  # Paris vem do SofaScore
         "Paris": ["Paris FC", "Paris", "PFC"],
     }
     
@@ -81,15 +81,45 @@ def normalizar_nome_time(nome):
 def times_correspondem(team_name, jogo_team_name):
     """
     Verifica se dois nomes de times correspondem, considerando apelidos.
+    Usa comparação exata para evitar confusão entre Paris FC e PSG.
     """
+    # Normalizar para lowercase
+    team_lower = team_name.lower()
+    jogo_lower = jogo_team_name.lower()
+    
+    # Casos especiais para evitar confusão entre Paris FC e PSG
+    paris_fc_variations = ['paris fc', 'pfc', 'paris']
+    psg_variations = ['paris saint-germain', 'psg', 'paris sg', 'paris saint germain']
+    
+    # Se um é Paris FC e outro é PSG, retorna False
+    if (team_lower in paris_fc_variations or jogo_lower in paris_fc_variations) and \
+       (team_lower in psg_variations or jogo_lower in psg_variations):
+        # Se um é Paris FC e outro é PSG, não são o mesmo time
+        is_team_paris_fc = team_lower in paris_fc_variations
+        is_team_psg = team_lower in psg_variations
+        is_jogo_paris_fc = jogo_lower in paris_fc_variations
+        is_jogo_psg = jogo_lower in psg_variations
+        
+        if (is_team_paris_fc and is_jogo_psg) or (is_team_psg and is_jogo_paris_fc):
+            return False
+    
+    # Comparação normal com apelidos
     variacoes_team = normalizar_nome_time(team_name)
     variacoes_jogo = normalizar_nome_time(jogo_team_name)
     
-    # Verifica se há interseção entre as variações
+    # Primeiro tenta comparação exata (case insensitive)
     for var1 in variacoes_team:
         for var2 in variacoes_jogo:
-            if var1.lower() in var2.lower() or var2.lower() in var1.lower():
+            if var1.lower() == var2.lower():
                 return True
+    
+    # Se não houver match exato, verifica se um contém o outro
+    # MAS apenas se ambos tiverem mais de 5 caracteres
+    for var1 in variacoes_team:
+        for var2 in variacoes_jogo:
+            if len(var1) > 5 and len(var2) > 5:
+                if var1.lower() in var2.lower() or var2.lower() in var1.lower():
+                    return True
     
     return False
 
