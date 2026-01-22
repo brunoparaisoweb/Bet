@@ -100,16 +100,19 @@ def scrape_sofascore_seria_last5(team_id, team_name, debug=False, click_navigati
                     is_fa_cup = 'unique-tournament/19/image' in card_html
                     is_coppa_italia = 'unique-tournament/53/image' in card_html
                     is_supercoppa = 'unique-tournament/465/image' in card_html
+                    is_champions_league = 'unique-tournament/7/image' in card_html
+                    is_europa_league = 'unique-tournament/679/image' in card_html
+                    is_conference_league = 'unique-tournament/8097/image' in card_html
                     
                     if debug and card_idx < 10:
                         card_text = card.inner_text()
                         first_line = card_text.split('\n')[0] if card_text else ""
-                        print(f"Card {card_idx}: SerieA={is_premier_league}, Coppa={is_coppa_italia}, Supercoppa={is_supercoppa}, first_line={repr(first_line[:50])}")
+                        print(f"Card {card_idx}: SerieA={is_premier_league}, Coppa={is_coppa_italia}, Supercoppa={is_supercoppa}, UCL={is_champions_league}, first_line={repr(first_line[:50])}")
                     
-                    # Ignora Coppa Italia e Supercoppa - processa apenas Serie A
-                    if is_fa_cup or is_efl_cup or is_coppa_italia or is_supercoppa:
+                    # Ignora Coppa Italia, Supercoppa e competições europeias - processa apenas Serie A
+                    if is_fa_cup or is_efl_cup or is_coppa_italia or is_supercoppa or is_champions_league or is_europa_league or is_conference_league:
                         if debug:
-                            print(f"Debug: Skipping card {card_idx} (Coppa Italia, Supercoppa ou Champions)")
+                            print(f"Debug: Skipping card {card_idx} (Coppa Italia, Supercoppa ou competições europeias)")
                         continue
                     
                     # Se não for Serie A, pula

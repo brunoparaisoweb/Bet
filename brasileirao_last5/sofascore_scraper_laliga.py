@@ -115,8 +115,9 @@ def scrape_sofascore_last5(team_id, team_name, debug=False, click_navigation=Tru
                     line = lines[i].strip()
                     
                     # Detecta headers de campeonato (SEMPRE atualiza o campeonato atual)
-                    if line in ['LaLiga', 'Copa del Rey', 'UEFA Champions League', 
-                               'Supercopa de España', 'Supercopa de Espa±a', 'Supercopa']:
+                    if line in ['LaLiga', 'Copa del Rey', 'UEFA Champions League', 'UEFA Europa League', 
+                               'UEFA Europa Conference League', 'Liga dos Campeões da UEFA', 
+                               'Liga Europa da UEFA', 'Supercopa de España', 'Supercopa de Espa±a', 'Supercopa']:
                         current_competition = line
                         if debug:
                             print(f"  >> Campeonato: {current_competition}")
