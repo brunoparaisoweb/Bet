@@ -598,9 +598,18 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
         # Usa nomes completos dos times
         home_name = jogo["time1"]
         away_name = jogo["time2"]
-        data_short = jogo["data"][:5]  # Pega só DD/MM
         
-        html += f'        <div class="jogo-rodada">{data_short} - {home_name} x {away_name}</div>\n'
+        # Processa data e hora - formato pode ser "DD/MM/YY HH:MM" ou "DD/MM"
+        data_completa = jogo.get("data", "")
+        # Extrai apenas DD/MM
+        data_short = data_completa[:5] if len(data_completa) >= 5 else data_completa
+        
+        # Extrai hora se existir (formato "DD/MM/YY HH:MM")
+        import re
+        match_hora = re.search(r'(\d{1,2}:\d{2})', data_completa)
+        hora_display = f" {match_hora.group(1)}" if match_hora else ""
+        
+        html += f'        <div class="jogo-rodada">{data_short}{hora_display} - {home_name} x {away_name}</div>\n'
     
     html += """
         <h3 style="margin-top: 12px;">Classificação</h3>

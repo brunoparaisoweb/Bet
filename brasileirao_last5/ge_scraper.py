@@ -28,10 +28,24 @@ def scrape_primeira_rodada():
                 # Extrai a data da linha
                 data_jogo = "28/01" if "28/01" in line else "29/01"
                 
+                # Procura por horário na mesma linha ou próximas linhas
+                horario = None
+                match_hora = re.search(r'(\d{1,2}h\d{2})', line)
+                if match_hora:
+                    horario = match_hora.group(1).replace('h', ':')
+                
                 # Próximas 2 linhas devem ser os times
                 if i + 2 < len(lines):
                     time1 = lines[i+1].strip()
                     time2 = lines[i+2].strip()
+                    
+                    # Se não encontrou horário na linha da data, procura nas próximas
+                    if not horario:
+                        for j in range(i, min(i+5, len(lines))):
+                            match_hora = re.search(r'(\d{1,2}h\d{2})', lines[j])
+                            if match_hora:
+                                horario = match_hora.group(1).replace('h', ':')
+                                break
                     
                     # Remove caracteres estranhos e valida
                     time1 = re.sub(r'[^a-zA-Zãçáéíóú\-\s]', '', time1).strip()
@@ -49,6 +63,7 @@ def scrape_primeira_rodada():
                             jogos_set.add(chave)
                             jogos.append({
                                 "data": data_jogo,
+                                "hora": horario,
                                 "time1": time1,
                                 "time2": time2
                             })

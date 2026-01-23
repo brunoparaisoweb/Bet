@@ -31,9 +31,21 @@ def extrair_bets_brasileirao(html_path):
         jogos_divs = soup.find_all('div', class_='jogo-rodada')
         for jogo_div in jogos_divs:
             texto = jogo_div.get_text(strip=True)
-            # Formato: "28/01 - CAM x PAL"
+            # Formato: "28/01 20:30 - CAM x PAL" ou "28/01 - CAM x PAL"
             if ' - ' in texto:
-                data, confronto_abrev = texto.split(' - ', 1)
+                partes_antes = texto.split(' - ', 1)
+                data_hora = partes_antes[0].strip()
+                confronto_abrev = partes_antes[1].strip()
+                
+                # Extrai data e hora
+                match = re.match(r'(\d{2}/\d{2})\s*(\d{1,2}:\d{2})?', data_hora)
+                if match:
+                    data = match.group(1)
+                    hora = match.group(2) if match.group(2) else None
+                else:
+                    data = data_hora.split()[0] if data_hora else data_hora
+                    hora = None
+                
                 # Expande abreviações
                 times_abrev = confronto_abrev.split(' x ')
                 if len(times_abrev) == 2:
@@ -42,7 +54,12 @@ def extrair_bets_brasileirao(html_path):
                     time1_completo = abreviacoes_br.get(time1_abrev, time1_abrev)
                     time2_completo = abreviacoes_br.get(time2_abrev, time2_abrev)
                     confronto_completo = f"{time1_completo} x {time2_completo}"
-                    jogos_rodada[confronto_completo.lower()] = data.strip()
+                    
+                    # Armazena data e hora juntas
+                    info_jogo = {'data': data.strip()}
+                    if hora:
+                        info_jogo['hora'] = hora
+                    jogos_rodada[confronto_completo.lower()] = info_jogo
         
         bets = []
         bets_table = soup.find('table', class_='bets-table')
@@ -77,7 +94,7 @@ def extrair_bets_brasileirao(html_path):
                             time1_bet = times_confronto[0].strip()
                             time2_bet = times_confronto[1].strip()
                             
-                            for jogo_key, jogo_data in jogos_rodada.items():
+                            for jogo_key, info_jogo in jogos_rodada.items():
                                 times_jogo = jogo_key.split(' x ')
                                 if len(times_jogo) == 2:
                                     time1_jogo = times_jogo[0].strip()
@@ -86,14 +103,25 @@ def extrair_bets_brasileirao(html_path):
                                     # Verifica se os times correspondem (em qualquer ordem)
                                     if ((time1_bet == time1_jogo and time2_bet == time2_jogo) or
                                         (time1_bet == time2_jogo and time2_bet == time1_jogo)):
-                                        data = jogo_data
+                                        # info_jogo agora é um dict com 'data' e opcionalmente 'hora'
+                                        data = info_jogo
                                         break
+                        
+                        # Formata data e hora para exibição
+                        if isinstance(data, dict):
+                            data_display = data.get('data', 'A definir')
+                            if data.get('hora'):
+                                data_display = f"{data_display} {data['hora']}"
+                        elif data:
+                            data_display = data
+                        else:
+                            data_display = 'A definir'
                         
                         bets.append({
                             'time': time_recomendado,
                             'confronto': confronto,
                             'diferenca': diferenca,
-                            'data': data or 'A definir'
+                            'data': data_display
                         })
         return bets
     except Exception as e:
@@ -135,10 +163,21 @@ def extrair_bets_padrao(html_path, campeonato):
         jogos_divs = soup.find_all('div', class_='jogo-rodada')
         for jogo_div in jogos_divs:
             texto = jogo_div.get_text(strip=True)
-            # Formato: "24/01 - Team x Team"
+            # Formato: "24/01 20:30 - Team x Team" ou "24/01 - Team x Team"
             if ' - ' in texto:
-                data, confronto = texto.split(' - ', 1)
-                confronto_original = confronto.strip()
+                partes_antes = texto.split(' - ', 1)
+                data_hora = partes_antes[0].strip()
+                confronto = partes_antes[1].strip()
+                confronto_original = confronto
+                
+                # Extrai data e hora
+                match = re.match(r'(\d{2}/\d{2})\s*(\d{1,2}:\d{2})?', data_hora)
+                if match:
+                    data = match.group(1)
+                    hora = match.group(2) if match.group(2) else None
+                else:
+                    data = data_hora.split()[0] if data_hora else data_hora
+                    hora = None
                 
                 # Expande nomes abreviados no confronto da rodada
                 confronto_expandido = confronto_original
@@ -152,7 +191,11 @@ def extrair_bets_padrao(html_path, campeonato):
                 for abrev, completo in expansoes.items():
                     confronto_expandido = confronto_expandido.replace(abrev, completo)
                 
-                jogos_rodada[confronto_expandido.lower()] = data.strip()
+                # Armazena data e hora juntas
+                info_jogo = {'data': data.strip()}
+                if hora:
+                    info_jogo['hora'] = hora
+                jogos_rodada[confronto_expandido.lower()] = info_jogo
         
         bets = []
         bet_items = soup.find_all('div', class_='bet-item')
@@ -188,7 +231,7 @@ def extrair_bets_padrao(html_path, campeonato):
                     time2_bet = times_bet[1].strip()
                     
                     # Busca correspondência nos jogos da rodada
-                    for jogo_key, jogo_data in jogos_rodada.items():
+                    for jogo_key, info_jogo in jogos_rodada.items():
                         # Separa os times do jogo
                         times_jogo = jogo_key.split(' x ')
                         if len(times_jogo) == 2:
@@ -198,14 +241,25 @@ def extrair_bets_padrao(html_path, campeonato):
                             # Verifica se os times correspondem (ordem direta ou inversa)
                             if ((time1_bet == time1_jogo and time2_bet == time2_jogo) or
                                 (time1_bet == time2_jogo and time2_bet == time1_jogo)):
-                                data = jogo_data
+                                # info_jogo agora é um dict com 'data' e opcionalmente 'hora'
+                                data = info_jogo
                                 break
+                
+                # Formata data e hora para exibição
+                if isinstance(data, dict):
+                    data_display = data.get('data', 'A definir')
+                    if data.get('hora'):
+                        data_display = f"{data_display} {data['hora']}"
+                elif data:
+                    data_display = data
+                else:
+                    data_display = 'A definir'
                 
                 bets.append({
                     'time': time_text,
                     'confronto': confronto_text,
                     'diferenca': diferenca,
-                    'data': data or 'A definir'
+                    'data': data_display
                 })
         
         return bets

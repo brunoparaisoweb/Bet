@@ -391,7 +391,8 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
 '''
     
     for jogo in jogos_rodada:
-        html += f'        <div class="jogo-rodada">{jogo["data"]} - {jogo["time1"]} x {jogo["time2"]}</div>\n'
+        hora_display = f" {jogo['hora']}" if jogo.get('hora') else ""
+        html += f'        <div class="jogo-rodada">{jogo["data"]}{hora_display} - {jogo["time1"]} x {jogo["time2"]}</div>\n'
     
     html += '''
         <h3 style="margin-top: 12px;">Classificação</h3>
