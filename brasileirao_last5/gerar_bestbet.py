@@ -4,6 +4,8 @@ Gera página consolidada BestBet com as melhores apostas de todos os campeonatos
 """
 from bs4 import BeautifulSoup
 import re
+import os
+from datetime import datetime
 
 def extrair_bets_brasileirao(html_path):
     """Extrai BETs do Brasileirão"""
@@ -230,13 +232,27 @@ def gerar_html_bestbet():
     print("Extraindo BETs da Premier League...")
     bets_premier = extrair_bets_padrao('premier_league_analysis.html', 'Premier League')
     
+    # Função para obter data de modificação do arquivo
+    def obter_data_modificacao(arquivo):
+        try:
+            timestamp = os.path.getmtime(arquivo)
+            data_hora = datetime.fromtimestamp(timestamp)
+            return data_hora.strftime('%d/%m/%Y %H:%M')
+        except:
+            return ''
+    
     # Gera seções HTML
     def gerar_secao(titulo, cor, bets, arquivo_html, usar_delta=False):
         cor_texto = 'color: #000;' if cor == '#87CEEB' else ''
+        data_modificacao = obter_data_modificacao(arquivo_html)
+        info_data = f'<span style="font-size: 0.75em; opacity: 0.9; margin-left: 10px;">Atualizado: {data_modificacao}</span>' if data_modificacao else ''
         
         html = f'''        <div class="campeonato-section">
             <div class="campeonato-header" style="background: {cor}; {cor_texto}">
-                {titulo}
+                <div>
+                    {titulo}
+                    {info_data}
+                </div>
                 <a href="{arquivo_html}" target="_blank" class="detail-link" title="Ver análise completa">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>

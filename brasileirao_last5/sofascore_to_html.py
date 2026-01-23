@@ -376,8 +376,10 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
             right: 0;
             background: #87CEEB;
             color: #000;
-            text-align: center;
-            padding: 4px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 15px;
             font-size: 9px;
             z-index: 1000;
         }
@@ -553,7 +555,15 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
         <strong>⚠️ ATENÇÃO</strong>
         Atentar ao encerramento da temporada. Atualizar: - ID e NOME dos novos times; - Atualizar as TABELAS
     </div>
-    <footer>Development for Bruno Paraiso - 2026 | Todos os direitos reservados</footer>
+    <footer>
+        <span>Development for Bruno Paraiso - 2026 | Todos os direitos reservados</span>
+        <span id="data-criacao"></span>
+    </footer>
+    <script>
+        const dataCriacao = new Date(document.lastModified);
+        document.getElementById('data-criacao').textContent = 
+            'Criado em: ' + dataCriacao.toLocaleString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'});
+    </script>
 </body>
 </html>
 '''
