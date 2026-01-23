@@ -125,6 +125,64 @@
             font-style: italic;
             grid-column: 1 / -1;
         }
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .info-data {
+            font-size: 0.75em;
+            opacity: 0.9;
+        }
+        .update-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .update-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        .update-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .progress-container {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        .progress-text {
+            text-align: center;
+            font-size: 0.85em;
+            color: #666;
+        }
         footer {
             position: fixed;
             bottom: 0;
@@ -145,17 +203,32 @@
         
         <div class="campeonato-section">
             <div class="campeonato-header" style="background: #87CEEB; color: #000;">
-                <div>
-                    ⚽ Brasileirão Betano
-                    <span style="font-size: 0.75em; opacity: 0.9; margin-left: 10px;">Atualizado: 23/01/2026 00:07</span>
+                <div class="header-content">
+                    <span>⚽ Brasileirão Betano</span>
+                    <span class="info-data" id="data-brasileirao">Atualizado: 23/01/2026 00:07</span>
                 </div>
-                <a href="sofascore_result.html" target="_blank" class="detail-link" title="Ver análise completa">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                </a>
+                <div class="header-actions">
+                    <button class="update-btn" onclick="atualizarCampeonato('brasileirao')" title="Atualizar análise">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                    <a href="sofascore_result.html" target="_blank" class="detail-link" title="Ver análise completa">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="progress-container" id="progress-brasileirao" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill-brasileirao"></div>
+                </div>
+                <div class="progress-text" id="progress-text-brasileirao">Iniciando...</div>
             </div>
             <div class="bet-grid">
                 <div class="bet-card" style="border-top: 4px solid #87CEEB;">
@@ -210,17 +283,32 @@
         </div>
         <div class="campeonato-section">
             <div class="campeonato-header" style="background: #FF4C00; ">
-                <div>
-                    🇪🇸 Campeonato Espanhol (La Liga)
-                    <span style="font-size: 0.75em; opacity: 0.9; margin-left: 10px;">Atualizado: 23/01/2026 00:05</span>
+                <div class="header-content">
+                    <span>🇪🇸 Campeonato Espanhol (La Liga)</span>
+                    <span class="info-data" id="data-laliga">Atualizado: 23/01/2026 00:42</span>
                 </div>
-                <a href="laliga_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                </a>
+                <div class="header-actions">
+                    <button class="update-btn" onclick="atualizarCampeonato('laliga')" title="Atualizar análise">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                    <a href="laliga_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="progress-container" id="progress-laliga" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill-laliga"></div>
+                </div>
+                <div class="progress-text" id="progress-text-laliga">Iniciando...</div>
             </div>
             <div class="bet-grid">
                 <div class="bet-card" style="border-top: 4px solid #FF4C00;">
@@ -256,6 +344,14 @@
                     </div>
                 </div>
                 <div class="bet-card" style="border-top: 4px solid #FF4C00;">
+                    <div class="bet-data">24/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha">Villarreal</div>
+                        <div class="versus">x</div>
+                        <div class="time-linha"><span class="time-destaque">Real Madrid</span></div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #FF4C00;">
                     <div class="bet-data">25/01</div>
                     <div class="bet-card-content">
                         <div class="time-linha">Alavés</div>
@@ -264,28 +360,43 @@
                     </div>
                 </div>
                 <div class="bet-card" style="border-top: 4px solid #FF4C00;">
-                    <div class="bet-data">24/01</div>
+                    <div class="bet-data">25/01</div>
                     <div class="bet-card-content">
-                        <div class="time-linha">Villarreal</div>
+                        <div class="time-linha">Real Sociedad</div>
                         <div class="versus">x</div>
-                        <div class="time-linha"><span class="time-destaque">Real Madrid</span></div>
+                        <div class="time-linha"><span class="time-destaque">Celta</span></div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="campeonato-section">
             <div class="campeonato-header" style="background: #0082c8; ">
-                <div>
-                    🇮🇹 Campeonato Italiano (Serie A)
-                    <span style="font-size: 0.75em; opacity: 0.9; margin-left: 10px;">Atualizado: 23/01/2026 00:04</span>
+                <div class="header-content">
+                    <span>🇮🇹 Campeonato Italiano (Serie A)</span>
+                    <span class="info-data" id="data-seria">Atualizado: 23/01/2026 00:42</span>
                 </div>
-                <a href="seria_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                </a>
+                <div class="header-actions">
+                    <button class="update-btn" onclick="atualizarCampeonato('seria')" title="Atualizar análise">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                    <a href="seria_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="progress-container" id="progress-seria" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill-seria"></div>
+                </div>
+                <div class="progress-text" id="progress-text-seria">Iniciando...</div>
             </div>
             <div class="bet-grid">
                 <div class="bet-card" style="border-top: 4px solid #0082c8;">
@@ -340,17 +451,32 @@
         </div>
         <div class="campeonato-section">
             <div class="campeonato-header" style="background: #003DA5; ">
-                <div>
-                    🇫🇷 Campeonato Francês (Ligue 1)
-                    <span style="font-size: 0.75em; opacity: 0.9; margin-left: 10px;">Atualizado: 23/01/2026 00:04</span>
+                <div class="header-content">
+                    <span>🇫🇷 Campeonato Francês (Ligue 1)</span>
+                    <span class="info-data" id="data-ligue1">Atualizado: 23/01/2026 00:42</span>
                 </div>
-                <a href="LIGUE1_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                </a>
+                <div class="header-actions">
+                    <button class="update-btn" onclick="atualizarCampeonato('ligue1')" title="Atualizar análise">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                    <a href="LIGUE1_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="progress-container" id="progress-ligue1" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill-ligue1"></div>
+                </div>
+                <div class="progress-text" id="progress-text-ligue1">Iniciando...</div>
             </div>
             <div class="bet-grid">
                 <div class="bet-card" style="border-top: 4px solid #003DA5;">
@@ -381,17 +507,32 @@
         </div>
         <div class="campeonato-section">
             <div class="campeonato-header" style="background: #37003c; ">
-                <div>
-                    🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League
-                    <span style="font-size: 0.75em; opacity: 0.9; margin-left: 10px;">Atualizado: 23/01/2026 00:02</span>
+                <div class="header-content">
+                    <span>🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</span>
+                    <span class="info-data" id="data-premier">Atualizado: 23/01/2026 00:29</span>
                 </div>
-                <a href="premier_league_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                </a>
+                <div class="header-actions">
+                    <button class="update-btn" onclick="atualizarCampeonato('premier')" title="Atualizar análise">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                    <a href="premier_league_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="progress-container" id="progress-premier" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill-premier"></div>
+                </div>
+                <div class="progress-text" id="progress-text-premier">Iniciando...</div>
             </div>
             <div class="bet-grid">
                 <div class="bet-card" style="border-top: 4px solid #37003c;">
@@ -445,6 +586,81 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        const API_URL = 'http://localhost:5000';
+        
+        async function atualizarCampeonato(campeonato) {
+            const progressContainer = document.getElementById(`progress-${campeonato}`);
+            const progressFill = document.getElementById(`progress-fill-${campeonato}`);
+            const progressText = document.getElementById(`progress-text-${campeonato}`);
+            const updateBtn = document.querySelector(`button[onclick="atualizarCampeonato('${campeonato}')"]`);
+            
+            // Mostra barra de progresso
+            progressContainer.style.display = 'block';
+            updateBtn.disabled = true;
+            
+            try {
+                // Inicia atualização
+                const response = await fetch(`${API_URL}/atualizar/${campeonato}`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao iniciar atualização');
+                }
+                
+                // Monitora progresso
+                const checkProgress = setInterval(async () => {
+                    const progressResponse = await fetch(`${API_URL}/progresso/${campeonato}`);
+                    const data = await progressResponse.json();
+                    
+                    progressFill.style.width = `${data.progresso}%`;
+                    progressText.textContent = data.mensagem;
+                    
+                    if (data.status === 'success') {
+                        clearInterval(checkProgress);
+                        progressText.textContent = 'Concluído! Recarregando página...';
+                        
+                        // Atualiza a data de modificação
+                        if (data.data_modificacao) {
+                            const dataElement = document.getElementById(`data-${campeonato}`);
+                            if (dataElement) {
+                                dataElement.textContent = `Atualizado: ${data.data_modificacao}`;
+                            }
+                        }
+                        
+                        // Recarrega a página após 2 segundos
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else if (data.status === 'error') {
+                        clearInterval(checkProgress);
+                        progressFill.style.background = '#f44336';
+                        updateBtn.disabled = false;
+                        
+                        setTimeout(() => {
+                            progressContainer.style.display = 'none';
+                            progressFill.style.width = '0%';
+                            progressFill.style.background = 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)';
+                        }, 3000);
+                    }
+                }, 500);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                progressText.textContent = 'Erro ao atualizar. Verifique se o servidor está rodando.';
+                progressFill.style.background = '#f44336';
+                updateBtn.disabled = false;
+                
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    progressFill.style.width = '0%';
+                    progressFill.style.background = 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)';
+                }, 3000);
+            }
+        }
+    </script>
     
     <footer>Development for Bruno Paraiso - 2026 | Todos os direitos reservados</footer>
 </body>

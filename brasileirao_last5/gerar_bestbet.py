@@ -242,24 +242,39 @@ def gerar_html_bestbet():
             return ''
     
     # Gera seções HTML
-    def gerar_secao(titulo, cor, bets, arquivo_html, usar_delta=False):
+    def gerar_secao(titulo, cor, bets, arquivo_html, campeonato_id, script_python, usar_delta=False):
         cor_texto = 'color: #000;' if cor == '#87CEEB' else ''
         data_modificacao = obter_data_modificacao(arquivo_html)
-        info_data = f'<span style="font-size: 0.75em; opacity: 0.9; margin-left: 10px;">Atualizado: {data_modificacao}</span>' if data_modificacao else ''
+        info_data = f'<span class="info-data" id="data-{campeonato_id}">Atualizado: {data_modificacao}</span>' if data_modificacao else ''
         
         html = f'''        <div class="campeonato-section">
             <div class="campeonato-header" style="background: {cor}; {cor_texto}">
-                <div>
-                    {titulo}
+                <div class="header-content">
+                    <span>{titulo}</span>
                     {info_data}
                 </div>
-                <a href="{arquivo_html}" target="_blank" class="detail-link" title="Ver análise completa">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                </a>
+                <div class="header-actions">
+                    <button class="update-btn" onclick="atualizarCampeonato('{campeonato_id}')" title="Atualizar análise">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                    <a href="{arquivo_html}" target="_blank" class="detail-link" title="Ver análise completa">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="progress-container" id="progress-{campeonato_id}" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill-{campeonato_id}"></div>
+                </div>
+                <div class="progress-text" id="progress-text-{campeonato_id}">Iniciando...</div>
             </div>
             <div class="bet-grid">
 '''
@@ -467,6 +482,64 @@ def gerar_html_bestbet():
             font-style: italic;
             grid-column: 1 / -1;
         }
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .info-data {
+            font-size: 0.75em;
+            opacity: 0.9;
+        }
+        .update-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .update-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        .update-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .progress-container {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        .progress-text {
+            text-align: center;
+            font-size: 0.85em;
+            color: #666;
+        }
         footer {
             position: fixed;
             bottom: 0;
@@ -488,14 +561,89 @@ def gerar_html_bestbet():
 '''
     
     # Adiciona cada seção
-    html += gerar_secao('⚽ Brasileirão Betano', '#87CEEB', bets_brasileirao, 'sofascore_result.html', usar_delta=True)
-    html += gerar_secao('🇪🇸 Campeonato Espanhol (La Liga)', '#FF4C00', bets_laliga, 'laliga_analysis.html')
-    html += gerar_secao('🇮🇹 Campeonato Italiano (Serie A)', '#0082c8', bets_seria, 'seria_analysis.html')
-    html += gerar_secao('🇫🇷 Campeonato Francês (Ligue 1)', '#003DA5', bets_ligue1, 'LIGUE1_analysis.html')
-    html += gerar_secao('🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League', '#37003c', bets_premier, 'premier_league_analysis.html')
+    html += gerar_secao('⚽ Brasileirão Betano', '#87CEEB', bets_brasileirao, 'sofascore_result.html', 'brasileirao', 'sofascore_to_html.py', usar_delta=True)
+    html += gerar_secao('🇪🇸 Campeonato Espanhol (La Liga)', '#FF4C00', bets_laliga, 'laliga_analysis.html', 'laliga', 'gerar_html_laliga.py')
+    html += gerar_secao('🇮🇹 Campeonato Italiano (Serie A)', '#0082c8', bets_seria, 'seria_analysis.html', 'seria', 'gerar_html_seria.py')
+    html += gerar_secao('🇫🇷 Campeonato Francês (Ligue 1)', '#003DA5', bets_ligue1, 'LIGUE1_analysis.html', 'ligue1', 'gerar_html_ligue1.py')
+    html += gerar_secao('🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League', '#37003c', bets_premier, 'premier_league_analysis.html', 'premier', 'gerar_html_pl.py')
     
-    # Footer
+    # JavaScript para atualização
     html += '''    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:5000';
+        
+        async function atualizarCampeonato(campeonato) {
+            const progressContainer = document.getElementById(`progress-${campeonato}`);
+            const progressFill = document.getElementById(`progress-fill-${campeonato}`);
+            const progressText = document.getElementById(`progress-text-${campeonato}`);
+            const updateBtn = document.querySelector(`button[onclick="atualizarCampeonato('${campeonato}')"]`);
+            
+            // Mostra barra de progresso
+            progressContainer.style.display = 'block';
+            updateBtn.disabled = true;
+            
+            try {
+                // Inicia atualização
+                const response = await fetch(`${API_URL}/atualizar/${campeonato}`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao iniciar atualização');
+                }
+                
+                // Monitora progresso
+                const checkProgress = setInterval(async () => {
+                    const progressResponse = await fetch(`${API_URL}/progresso/${campeonato}`);
+                    const data = await progressResponse.json();
+                    
+                    progressFill.style.width = `${data.progresso}%`;
+                    progressText.textContent = data.mensagem;
+                    
+                    if (data.status === 'success') {
+                        clearInterval(checkProgress);
+                        progressText.textContent = 'Concluído! Recarregando página...';
+                        
+                        // Atualiza a data de modificação
+                        if (data.data_modificacao) {
+                            const dataElement = document.getElementById(`data-${campeonato}`);
+                            if (dataElement) {
+                                dataElement.textContent = `Atualizado: ${data.data_modificacao}`;
+                            }
+                        }
+                        
+                        // Recarrega a página após 2 segundos
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else if (data.status === 'error') {
+                        clearInterval(checkProgress);
+                        progressFill.style.background = '#f44336';
+                        updateBtn.disabled = false;
+                        
+                        setTimeout(() => {
+                            progressContainer.style.display = 'none';
+                            progressFill.style.width = '0%';
+                            progressFill.style.background = 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)';
+                        }, 3000);
+                    }
+                }, 500);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                progressText.textContent = 'Erro ao atualizar. Verifique se o servidor está rodando.';
+                progressFill.style.background = '#f44336';
+                updateBtn.disabled = false;
+                
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    progressFill.style.width = '0%';
+                    progressFill.style.background = 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)';
+                }, 3000);
+            }
+        }
+    </script>
     
     <footer>Development for Bruno Paraiso - 2026 | Todos os direitos reservados</footer>
 </body>
