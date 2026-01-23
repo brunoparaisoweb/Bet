@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BestBet - Melhores Apostas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px 10px 30px 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 15px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 2em;
+            margin: 0 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .campeonato-section {
+            margin-bottom: 12px;
+        }
+        .campeonato-header {
+            padding: 8px 15px;
+            color: #fff;
+            font-size: 0.95em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .detail-link {
+            color: #fff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: transform 0.2s;
+            opacity: 0.9;
+        }
+        .detail-link:hover {
+            transform: scale(1.2);
+            opacity: 1;
+        }
+        .detail-link svg {
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+        }
+        .bet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 5px;
+        }
+        .bet-card {
+            background: #fff;
+            padding: 10px 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-top: 4px solid;
+            text-align: center;
+        }
+        .bet-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .bet-card-content {
+            font-weight: bold;
+            font-size: 0.75em;
+            color: #333;
+            margin-bottom: 0;
+            line-height: 1.2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .time-linha {
+            text-align: center;
+            width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+        .versus {
+            color: #999;
+            font-size: 0.85em;
+            font-weight: normal;
+            margin: 1px 0;
+        }
+        .time-destaque {
+            color: #d00;
+            font-weight: 900;
+            font-size: 1.2em;
+            text-decoration: underline;
+        }
+        .bet-data {
+            font-size: 0.7em;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: normal;
+        }
+        .no-bets {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-style: italic;
+            grid-column: 1 / -1;
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 11px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 BestBet 🏆</h1>
+        
+        <div class="campeonato-section">
+            <div class="campeonato-header" style="background: #87CEEB; color: #000;">
+                ⚽ Brasileirão Betano
+                <a href="sofascore_result.html" target="_blank" class="detail-link" title="Ver análise completa">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </a>
+            </div>
+            <div class="bet-grid">
+                <div class="bet-card" style="border-top: 4px solid #87CEEB;">
+                    <div class="bet-data">29/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Mirassol</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Vasco</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #87CEEB;">
+                    <div class="bet-data">28/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Palmeiras</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Atlético-MG</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #87CEEB;">
+                    <div class="bet-data">28/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Santos</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Chapecoense</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #87CEEB;">
+                    <div class="bet-data">28/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Fluminense</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Grêmio</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #87CEEB;">
+                    <div class="bet-data">28/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Vitória</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Remo</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #87CEEB;">
+                    <div class="bet-data">28/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Flamengo</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">São Paulo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="campeonato-section">
+            <div class="campeonato-header" style="background: #FF4C00; ">
+                🇪🇸 Campeonato Espanhol (La Liga)
+                <a href="laliga_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </a>
+            </div>
+            <div class="bet-grid">
+                <div class="bet-card" style="border-top: 4px solid #FF4C00;">
+                    <div class="bet-data">25/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Atlético Madrid</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Mallorca</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #FF4C00;">
+                    <div class="bet-data">24/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha">Sevilla</div>
+                        <div class="versus">x</div>
+                        <div class="time-linha"><span class="time-destaque">Athletic Club</span></div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #FF4C00;">
+                    <div class="bet-data">25/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Barcelona</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Real Oviedo</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #FF4C00;">
+                    <div class="bet-data">26/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Girona</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Getafe</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #FF4C00;">
+                    <div class="bet-data">25/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha">Alavés</div>
+                        <div class="versus">x</div>
+                        <div class="time-linha"><span class="time-destaque">Real Betis</span></div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #FF4C00;">
+                    <div class="bet-data">24/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha">Villarreal</div>
+                        <div class="versus">x</div>
+                        <div class="time-linha"><span class="time-destaque">Real Madrid</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="campeonato-section">
+            <div class="campeonato-header" style="background: #0082c8; ">
+                🇮🇹 Campeonato Italiano (Serie A)
+                <a href="seria_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </a>
+            </div>
+            <div class="bet-grid">
+                <div class="bet-card" style="border-top: 4px solid #0082c8;">
+                    <div class="bet-data">23/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Internazionale</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Pisa</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #0082c8;">
+                    <div class="bet-data">24/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Fiorentina</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Cagliari</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #0082c8;">
+                    <div class="bet-data">24/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Como</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Torino</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #0082c8;">
+                    <div class="bet-data">25/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Atalanta</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Parma</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #0082c8;">
+                    <div class="bet-data">25/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha">Juventus</div>
+                        <div class="versus">x</div>
+                        <div class="time-linha"><span class="time-destaque">Napoli</span></div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #0082c8;">
+                    <div class="bet-data">25/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Genoa</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Bologna</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="campeonato-section">
+            <div class="campeonato-header" style="background: #003DA5; ">
+                🇫🇷 Campeonato Francês (Ligue 1)
+                <a href="LIGUE1_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </a>
+            </div>
+            <div class="bet-grid">
+                <div class="bet-card" style="border-top: 4px solid #003DA5;">
+                    <div class="bet-data">23/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha">Auxerre</div>
+                        <div class="versus">x</div>
+                        <div class="time-linha"><span class="time-destaque">Paris Saint-Germain</span></div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #003DA5;">
+                    <div class="bet-data">25/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha">Metz</div>
+                        <div class="versus">x</div>
+                        <div class="time-linha"><span class="time-destaque">Lyon</span></div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #003DA5;">
+                    <div class="bet-data">25/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha">Lille</div>
+                        <div class="versus">x</div>
+                        <div class="time-linha"><span class="time-destaque">Strasbourg</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="campeonato-section">
+            <div class="campeonato-header" style="background: #37003c; ">
+                🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League
+                <a href="premier_league_analysis.html" target="_blank" class="detail-link" title="Ver análise completa">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </a>
+            </div>
+            <div class="bet-grid">
+                <div class="bet-card" style="border-top: 4px solid #37003c;">
+                    <div class="bet-data">24/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha">Bournemouth</div>
+                        <div class="versus">x</div>
+                        <div class="time-linha"><span class="time-destaque">Liverpool</span></div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #37003c;">
+                    <div class="bet-data">24/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha">Burnley</div>
+                        <div class="versus">x</div>
+                        <div class="time-linha"><span class="time-destaque">Tottenham</span></div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #37003c;">
+                    <div class="bet-data">25/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha">Crystal Palace</div>
+                        <div class="versus">x</div>
+                        <div class="time-linha"><span class="time-destaque">Chelsea</span></div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #37003c;">
+                    <div class="bet-data">25/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Newcastle</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Aston Villa</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #37003c;">
+                    <div class="bet-data">24/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Manchester City</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Wolverhampton</div>
+                    </div>
+                </div>
+                <div class="bet-card" style="border-top: 4px solid #37003c;">
+                    <div class="bet-data">25/01</div>
+                    <div class="bet-card-content">
+                        <div class="time-linha"><span class="time-destaque">Arsenal</span></div>
+                        <div class="versus">x</div>
+                        <div class="time-linha">Manchester United</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>Development for Bruno Paraiso - 2026 | Todos os direitos reservados</footer>
+</body>
+</html>
