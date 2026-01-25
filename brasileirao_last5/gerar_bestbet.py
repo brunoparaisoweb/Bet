@@ -267,6 +267,120 @@ def extrair_bets_padrao(html_path, campeonato):
         print(f"Erro ao extrair BETs de {campeonato}: {e}")
         return []
 
+def eh_classico(time1, time2, campeonato):
+    """Verifica se o confronto é um clássico"""
+    # Normaliza os nomes dos times
+    time1_lower = time1.lower().strip()
+    time2_lower = time2.lower().strip()
+    
+    # Define os clássicos de cada campeonato
+    classicos = {
+        'premier': [
+            ('liverpool', 'manchester united'),
+            ('arsenal', 'tottenham'),
+            ('manchester city', 'manchester united'),
+            ('newcastle', 'sunderland'),
+            ('everton', 'liverpool'),
+            ('chelsea', 'tottenham'),
+            ('arsenal', 'manchester united'),
+            ('aston villa', 'birmingham'),
+            ('portsmouth', 'southampton'),
+            ('leeds', 'manchester united'),
+            ('arsenal', 'chelsea'),
+        ],
+        'laliga': [
+            ('barcelona', 'real madrid'),
+            ('real madrid', 'atlético'),
+            ('atlético madrid', 'real madrid'),
+            ('sevilla', 'real betis'),
+            ('betis', 'sevilla'),
+            ('barcelona', 'espanyol'),
+            ('athletic club', 'real sociedad'),
+            ('sociedad', 'athletic'),
+            ('celta', 'coruña'),
+            ('deportivo', 'celta'),
+            ('valencia', 'levante'),
+        ],
+        'seria': [
+            ('juventus', 'internazionale'),
+            ('inter', 'juventus'),
+            ('milan', 'inter'),
+            ('inter', 'milan'),
+            ('roma', 'lazio'),
+            ('lazio', 'roma'),
+            ('juventus', 'torino'),
+            ('torino', 'juventus'),
+            ('genoa', 'sampdoria'),
+            ('sampdoria', 'genoa'),
+            ('milan', 'juventus'),
+        ],
+        'ligue1': [
+            ('psg', 'marseille'),
+            ('paris', 'marseille'),
+            ('paris saint-germain', 'marseille'),
+            ('lyon', 'étienne'),
+            ('lyon', 'etienne'),
+            ('saint-étienne', 'lyon'),
+            ('saint-etienne', 'lyon'),
+            ('lyon', 'marseille'),
+            ('lille', 'lens'),
+            ('lens', 'lille'),
+            ('monaco', 'nice'),
+            ('nice', 'monaco'),
+        ],
+        'brasileirao': [
+            ('flamengo', 'fluminense'),
+            ('fluminense', 'flamengo'),
+            ('palmeiras', 'corinthians'),
+            ('corinthians', 'palmeiras'),
+            ('grêmio', 'internacional'),
+            ('gremio', 'internacional'),
+            ('internacional', 'grêmio'),
+            ('internacional', 'gremio'),
+            ('vasco', 'flamengo'),
+            ('flamengo', 'vasco'),
+            ('bahia', 'vitória'),
+            ('bahia', 'vitoria'),
+            ('vitória', 'bahia'),
+            ('vitoria', 'bahia'),
+            ('athletico', 'coritiba'),
+            ('athletico-pr', 'coritiba'),
+            ('coritiba', 'athletico'),
+            ('cruzeiro', 'atlético'),
+            ('cruzeiro', 'atletico'),
+            ('atlético', 'cruzeiro'),
+            ('atlético-mg', 'cruzeiro'),
+            ('atletico-mg', 'cruzeiro'),
+            ('santos', 'são paulo'),
+            ('santos', 'sao paulo'),
+            ('são paulo', 'santos'),
+            ('sao paulo', 'santos'),
+            ('flamengo', 'palmeiras'),
+            ('palmeiras', 'flamengo'),
+            ('flamengo', 'botafogo'),
+            ('botafogo', 'flamengo'),
+            ('corinthians', 'são paulo'),
+            ('corinthians', 'sao paulo'),
+            ('são paulo', 'corinthians'),
+            ('sao paulo', 'corinthians'),
+            ('corinthians', 'santos'),
+            ('santos', 'corinthians'),
+            ('palmeiras', 'santos'),
+            ('santos', 'palmeiras'),
+        ]
+    }
+    
+    # Obtém a lista de clássicos do campeonato
+    classicos_campeonato = classicos.get(campeonato, [])
+    
+    # Verifica se o confronto está na lista de clássicos (em qualquer ordem)
+    for time_a, time_b in classicos_campeonato:
+        if ((time_a in time1_lower or time1_lower in time_a) and (time_b in time2_lower or time2_lower in time_b)) or \
+           ((time_a in time2_lower or time2_lower in time_a) and (time_b in time1_lower or time1_lower in time_b)):
+            return True
+    
+    return False
+
 def gerar_html_bestbet():
     """Gera o HTML consolidado BestBet"""
     
@@ -350,6 +464,11 @@ def gerar_html_bestbet():
                     time1 = times_confronto[0].strip()
                     time2 = times_confronto[1].strip()
                     
+                    # Verifica se é um clássico
+                    is_classico = eh_classico(time1, time2, campeonato_id)
+                    class_classico = ' classico' if is_classico else ''
+                    badge_classico = '<div class="classico-badge">⭐ Clássico</div>\n                    ' if is_classico else ''
+                    
                     # Verifica qual time deve ser destacado usando matching parcial
                     time_destacado = None
                     time1_destacado = False
@@ -385,8 +504,8 @@ def gerar_html_bestbet():
                     time1_html = f'<span class="time-destaque">{time1}</span>' if time1_destacado else time1
                     time2_html = f'<span class="time-destaque">{time2}</span>' if time2_destacado else time2
                     
-                    html += f'''                <div class="bet-card" style="border-top: 4px solid {cor};">
-                    <div class="bet-data">{bet.get('data', 'A definir')}</div>
+                    html += f'''                <div class="bet-card{class_classico}" style="border-top: 4px solid {cor};">
+                    {badge_classico}<div class="bet-data">{bet.get('data', 'A definir')}</div>
                     <div class="bet-card-content">
                         <div class="time-linha">{time1_html}</div>
                         <div class="versus">x</div>
@@ -488,10 +607,39 @@ def gerar_html_bestbet():
             transition: transform 0.2s, box-shadow 0.2s;
             border-top: 4px solid;
             text-align: center;
+            position: relative;
         }
         .bet-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .bet-card.classico {
+            background: linear-gradient(135deg, #fff8dc 0%, #fffaed 100%);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            border: 2px solid #FFD700;
+            border-top: 4px solid #FFD700 !important;
+            padding-top: 18px;
+        }
+        .bet-card.classico:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+        .classico-badge {
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.6em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+            border: 1px solid #FFD700;
+            z-index: 10;
         }
         .bet-card-content {
             font-weight: bold;
