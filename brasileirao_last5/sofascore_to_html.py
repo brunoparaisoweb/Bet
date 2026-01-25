@@ -8,8 +8,58 @@ import webbrowser
 import json
 import os
 from sofascore_scraper import scrape_sofascore_last5
-from ge_scraper import scrape_primeira_rodada, scrape_classificacao
+# from ge_scraper import scrape_primeira_rodada, scrape_classificacao
 from ogol_scraper import scrape_h2h_ogol
+
+# Horários fixos da rodada 1 do Brasileirão 2026
+HORARIOS_RODADA_1 = {
+    "Atlético-MG x Palmeiras": "19:00",
+    "Internacional x Athletico-PR": "19:00",
+    "Coritiba x RB Bragantino": "19:00",
+    "Vitória x Remo": "19:00",
+    "Fluminense x Grêmio": "19:30",
+    "Corinthians x Bahia": "20:00",
+    "Chapecoense x Santos": "20:00",
+    "São Paulo x Flamengo": "21:30",
+    "Mirassol x Vasco": "20:00",
+    "Botafogo x Cruzeiro": "21:30"
+}
+
+def scrape_primeira_rodada():
+    """Retorna os jogos da 1ª rodada do Brasileirão com horários"""
+    jogos = [
+        {"data": "28/01", "hora": "19:00", "time1": "Atlético-MG", "time2": "Palmeiras"},
+        {"data": "28/01", "hora": "19:00", "time1": "Internacional", "time2": "Athletico-PR"},
+        {"data": "28/01", "hora": "19:00", "time1": "Coritiba", "time2": "RB Bragantino"},
+        {"data": "28/01", "hora": "19:00", "time1": "Vitória", "time2": "Remo"},
+        {"data": "28/01", "hora": "19:30", "time1": "Fluminense", "time2": "Grêmio"},
+        {"data": "28/01", "hora": "20:00", "time1": "Corinthians", "time2": "Bahia"},
+        {"data": "28/01", "hora": "20:00", "time1": "Chapecoense", "time2": "Santos"},
+        {"data": "28/01", "hora": "21:30", "time1": "São Paulo", "time2": "Flamengo"},
+        {"data": "29/01", "hora": "20:00", "time1": "Mirassol", "time2": "Vasco"},
+        {"data": "29/01", "hora": "21:30", "time1": "Botafogo", "time2": "Cruzeiro"}
+    ]
+    return jogos
+
+def scrape_classificacao():
+    """Retorna a classificação atual do Brasileirão"""
+    times_brasileirao = [
+        "Flamengo", "Palmeiras", "São Paulo", "Corinthians", "Fluminense",
+        "Grêmio", "Botafogo", "Atlético-MG", "Internacional", "Cruzeiro",
+        "Athletico-PR", "Bahia", "Vasco", "Bragantino", "Vitória",
+        "Mirassol", "Santos", "Remo", "Chapecoense", "Coritiba"
+    ]
+    
+    classificacao = []
+    for i, time in enumerate(times_brasileirao, 1):
+        classificacao.append({
+            "posicao": str(i),
+            "time": time,
+            "pontos": "0",
+            "jogos": "0"
+        })
+    
+    return classificacao
 
 def calcular_pontos_credito(time_nome, jogos):
     """Calcula pontos de crédito baseado nos últimos jogos.
