@@ -11,6 +11,9 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
+# Data e hora de início do servidor
+data_inicio_servidor = datetime.now()
+
 # Status de progresso para cada campeonato
 progresso = {
     'brasileirao': {'status': 'idle', 'progresso': 0, 'mensagem': ''},
@@ -143,6 +146,30 @@ def obter_data_modificacao(campeonato):
         return jsonify({'data': data_modificacao})
     
     return jsonify({'data': 'N/A'})
+
+@app.route('/server_info')
+def obter_info_servidor():
+    """Retorna informações do servidor"""
+    global data_inicio_servidor
+    return jsonify({
+        'data_inicio': data_inicio_servidor.strftime('%d/%m/%Y %H:%M:%S'),
+        'status': 'online'
+    })
+
+@app.route('/restart', methods=['POST'])
+def reiniciar_servidor():
+    """Reinicia o servidor Flask"""
+    def restart():
+        import sys
+        import time
+        time.sleep(1)  # Aguarda 1 segundo antes de reiniciar
+        os.execv(sys.executable, ['python'] + sys.argv)
+    
+    # Executa o restart em uma thread separada para retornar a resposta antes
+    thread = threading.Thread(target=restart)
+    thread.start()
+    
+    return jsonify({'success': True, 'message': 'Servidor será reiniciado em 1 segundo'})
 
 if __name__ == '__main__':
     print("Servidor BestBet iniciado em http://localhost:5000")

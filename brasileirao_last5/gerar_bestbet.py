@@ -562,6 +562,63 @@ def gerar_html_bestbet():
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .server-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
+        .server-status {
+            font-size: 0.8em;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .restart-btn {
+            background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(244, 67, 54, 0.5);
+        }
+        .restart-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .restart-btn svg {
+            width: 20px;
+            height: 20px;
+        }
         .campeonato-section {
             margin-bottom: 12px;
         }
@@ -758,7 +815,21 @@ def gerar_html_bestbet():
 </head>
 <body>
     <div class="container">
-        <h1>🏆 BestBet 🏆</h1>
+        <div class="header-container">
+            <h1>🏆 BestBet 🏆</h1>
+            <div class="server-info">
+                <div class="server-status">
+                    <span class="status-indicator"></span>
+                    <span id="server-time">Carregando...</span>
+                </div>
+                <button class="restart-btn" onclick="reiniciarServidor()" title="Reiniciar Servidor">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                    </svg>
+                    Reiniciar Servidor
+                </button>
+            </div>
+        </div>
         
 '''
     
@@ -774,6 +845,24 @@ def gerar_html_bestbet():
     
     <script>
         const API_URL = 'http://localhost:5000';
+        
+        // Carrega informações do servidor
+        async function carregarInfoServidor() {
+            try {
+                const response = await fetch(`${API_URL}/server_info`);
+                const data = await response.json();
+                
+                if (data.data_inicio) {
+                    document.getElementById('server-time').textContent = `Servidor iniciado: ${data.data_inicio}`;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar info do servidor:', error);
+                document.getElementById('server-time').textContent = 'Servidor offline';
+            }
+        }
+        
+        // Carrega info do servidor ao carregar a página
+        window.addEventListener('DOMContentLoaded', carregarInfoServidor);
         
         async function atualizarCampeonato(campeonato) {
             const progressContainer = document.getElementById(`progress-${campeonato}`);
@@ -842,6 +931,42 @@ def gerar_html_bestbet():
                     progressContainer.style.display = 'none';
                     progressFill.style.width = '0%';
                     progressFill.style.background = 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)';
+                }, 3000);
+            }
+        }
+        
+        async function reiniciarServidor() {
+            const btn = document.querySelector('.restart-btn');
+            
+            if (!confirm('Tem certeza que deseja reiniciar o servidor?')) {
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg> Reiniciando...';
+            
+            try {
+                const response = await fetch(`${API_URL}/restart`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg> Servidor Reiniciado!';
+                    
+                    // Aguarda 3 segundos e recarrega a página
+                    setTimeout(() => {
+                        location.reload();
+                    }, 3000);
+                } else {
+                    throw new Error('Erro ao reiniciar servidor');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg> Erro ao Reiniciar';
+                btn.disabled = false;
+                
+                setTimeout(() => {
+                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg> Reiniciar Servidor';
                 }, 3000);
             }
         }
