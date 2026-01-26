@@ -355,6 +355,10 @@ def analisar_apostas(jogos_rodada, pontos_credito):
     # Ordena por diferença (maior primeiro)
     apostas.sort(key=lambda x: x["diferenca"], reverse=True)
     
+    # Remove a primeira aposta (maior diferença) seguindo nova regra
+    if len(apostas) > 0:
+        apostas = apostas[1:]
+    
     return apostas
 
 def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resultados_h2h=None, apostas=None):

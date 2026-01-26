@@ -304,6 +304,10 @@ def gerar_html_seria():
             (a["creditos_mandante"] > 0 if a["favorito"] == a["mandante"] else a["creditos_visitante"] > 0)]
     bets.sort(key=lambda x: x["diferenca"], reverse=True)
     
+    # Remove a primeira aposta (maior diferença) seguindo nova regra
+    if len(bets) > 0:
+        bets = bets[1:]
+    
     # 6. Gerar HTML
     html = gerar_html_template(CLASSIFICACAO_ATUAL, analises_rodada, dados_times, bets, h2h_dados)
     
