@@ -626,6 +626,33 @@ def gerar_html_bestbet():
             width: 20px;
             height: 20px;
         }
+        .publish-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+        }
+        .publish-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.5);
+        }
+        .publish-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .publish-btn svg {
+            width: 20px;
+            height: 20px;
+        }
         .campeonato-section {
             margin-bottom: 12px;
         }
@@ -829,12 +856,22 @@ def gerar_html_bestbet():
                     <span class="status-indicator"></span>
                     <span id="server-time">Carregando...</span>
                 </div>
-                <button class="restart-btn" onclick="reiniciarServidor()" title="Reiniciar Servidor">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-                    </svg>
-                    Reiniciar Servidor
-                </button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="publish-btn" onclick="publicarBets()" title="Publicar Bets no App">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        Publicar no App
+                    </button>
+                    <button class="restart-btn" onclick="reiniciarServidor()" title="Reiniciar Servidor">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                        </svg>
+                        Reiniciar Servidor
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -852,6 +889,120 @@ def gerar_html_bestbet():
     
     <script>
         const API_URL = 'http://localhost:5000';
+        const BACKEND_API_URL = 'http://localhost:3000'; // Backend BetApp
+        
+        // Função para extrair bets da página
+        function extrairBetsDaPagina() {
+            const bets = [];
+            const leagues = [];
+            
+            // Seleciona todas as seções de campeonatos
+            const campeonatoSections = document.querySelectorAll('.campeonato-section');
+            
+            campeonatoSections.forEach(section => {
+                const header = section.querySelector('.campeonato-header');
+                const leagueName = header ? header.textContent.split('Ver')[0].trim() : '';
+                
+                if (leagueName && !leagues.includes(leagueName)) {
+                    leagues.push(leagueName);
+                }
+                
+                // Extrai bets de cada seção
+                const betCards = section.querySelectorAll('.bet-card');
+                betCards.forEach(card => {
+                    const confronto = card.querySelector('.confronto')?.textContent.trim() || '';
+                    const dataHora = card.querySelector('.data-hora')?.textContent.trim() || '';
+                    const recomendacao = card.querySelector('.bet-time')?.textContent.trim() || '';
+                    const deltaElement = card.querySelector('.bet-delta');
+                    const delta = deltaElement ? deltaElement.textContent.replace('Δ', '').trim() : '0';
+                    
+                    // Extrai data e hora separadamente
+                    const [data, hora] = dataHora.split(' - ');
+                    
+                    // Extrai times e escudos
+                    const timesElements = card.querySelectorAll('.time img');
+                    const times = Array.from(timesElements).map(img => img.alt || '');
+                    const badges = Array.from(timesElements).map(img => img.src || '');
+                    
+                    bets.push({
+                        league: leagueName,
+                        match: confronto,
+                        date: data?.trim() || '',
+                        time: hora?.trim() || '',
+                        dateTime: dataHora,
+                        homeTeam: times[0] || '',
+                        awayTeam: times[1] || '',
+                        homeBadge: badges[0] || '',
+                        awayBadge: badges[1] || '',
+                        recommendation: recomendacao,
+                        delta: parseFloat(delta) || 0
+                    });
+                });
+            });
+            
+            return { bets, leagues };
+        }
+        
+        // Função para publicar bets no backend
+        async function publicarBets() {
+            const btn = document.querySelector('.publish-btn');
+            
+            if (!confirm('Publicar todas as bets no aplicativo móvel?')) {
+                return;
+            }
+            
+            btn.disabled = true;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Publicando...';
+            
+            try {
+                // Extrai bets da página
+                const { bets, leagues } = extrairBetsDaPagina();
+                
+                if (bets.length === 0) {
+                    alert('Nenhuma bet encontrada para publicar!');
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                    return;
+                }
+                
+                // Envia para o backend
+                const response = await fetch(`${BACKEND_API_URL}/api/bets/publish`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        bets: bets,
+                        leagues: leagues,
+                        generatedAt: new Date().toISOString()
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Publicado!';
+                    alert(`✅ ${bets.length} bets publicadas com sucesso!\\n\\nAs bets já estão disponíveis no aplicativo móvel.`);
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                    }, 3000);
+                } else {
+                    throw new Error(data.error || 'Erro ao publicar');
+                }
+            } catch (error) {
+                console.error('Erro ao publicar:', error);
+                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Erro!';
+                alert(`❌ Erro ao publicar bets:\\n\\n${error.message}\\n\\nVerifique se o servidor backend está rodando na porta 3000.`);
+                btn.disabled = false;
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 3000);
+            }
+        }
         
         // Carrega informações do servidor
         async function carregarInfoServidor() {
