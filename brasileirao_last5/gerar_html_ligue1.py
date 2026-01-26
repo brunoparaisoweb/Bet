@@ -8,6 +8,7 @@ from datetime import datetime
 from sofascore_scraper_ligue1 import scrape_all_teams_sofascore, LIGUE1_TEAM_IDS
 from config_ligue1 import PROXIMA_RODADA, CLASSIFICACAO_ATUAL
 from ogol_scraper_ligue1 import scrape_h2h_ogol_ligue1
+from sofascore_team_ids import get_team_logo_html
 
 def calcular_creditos_time(team_name, ultimos_jogos, classificacao, h2h_data=None):
     """
@@ -736,7 +737,10 @@ def gerar_html_template(classificacao, analises, dados_times, bets, h2h_dados):
                 else:
                     css_class = "derrota"
             
-            html += f'        <tr class="{css_class}"><td>{date_formatted}</td><td>{home_team}</td><td>{away_team}</td><td>{home_score} x {away_score}</td></tr>\n'
+            # Adiciona escudos dos times
+            home_logo = get_team_logo_html(home_team, "18px")
+            away_logo = get_team_logo_html(away_team, "18px")
+            html += f'        <tr class="{css_class}"><td>{date_formatted}</td><td>{home_logo}{home_team}</td><td>{away_logo}{away_team}</td><td>{home_score} x {away_score}</td></tr>\n'
         
         html += """    </table>
     </div>

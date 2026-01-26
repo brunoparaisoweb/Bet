@@ -10,6 +10,7 @@ import os
 from sofascore_scraper import scrape_sofascore_last5
 # from ge_scraper import scrape_primeira_rodada, scrape_classificacao
 from ogol_scraper import scrape_h2h_ogol
+from sofascore_team_ids import get_team_logo_html
 
 # Horários fixos da rodada 1 do Brasileirão 2026
 HORARIOS_RODADA_1 = {
@@ -539,7 +540,10 @@ def gerar_html(times_jogos, jogos_rodada, classificacao, pontos_credito, resulta
                     else:
                         classe = "empate"
             
-            html += f'        <tr class="{classe}"><td>{data}</td><td>{home}</td><td>{away}</td><td>{score}</td></tr>\n'
+            # Adiciona escudos dos times
+            home_logo = get_team_logo_html(home, "18px")
+            away_logo = get_team_logo_html(away, "18px")
+            html += f'        <tr class="{classe}"><td>{data}</td><td>{home_logo}{home}</td><td>{away_logo}{away}</td><td>{score}</td></tr>\n'
         html += "    </table>\n"
         html += "    </div>\n"
     

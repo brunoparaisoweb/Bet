@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import re
 import os
 from datetime import datetime
+from sofascore_team_ids import get_team_logo_html
 
 def extrair_bets_brasileirao(html_path):
     """Extrai BETs do Brasileirão"""
@@ -504,12 +505,16 @@ def gerar_html_bestbet():
                     time1_html = f'<span class="time-destaque">{time1}</span>' if time1_destacado else time1
                     time2_html = f'<span class="time-destaque">{time2}</span>' if time2_destacado else time2
                     
+                    # Adiciona escudos dos times
+                    logo1 = get_team_logo_html(time1, "24px")
+                    logo2 = get_team_logo_html(time2, "24px")
+                    
                     html += f'''                <div class="bet-card{class_classico}" style="border-top: 4px solid {cor};">
                     {badge_classico}<div class="bet-data">{bet.get('data', 'A definir')}</div>
                     <div class="bet-card-content">
-                        <div class="time-linha">{time1_html}</div>
+                        <div class="time-linha">{logo1}{time1_html}</div>
                         <div class="versus">x</div>
-                        <div class="time-linha">{time2_html}</div>
+                        <div class="time-linha">{logo2}{time2_html}</div>
                     </div>
                 </div>
 '''
