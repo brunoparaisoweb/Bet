@@ -89,6 +89,42 @@
             width: 20px;
             height: 20px;
         }
+        .selection-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        .selection-btn {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+        .selection-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+        }
+        .selection-counter {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: bold;
+            padding: 8px 12px;
+            background: #fff;
+            border-radius: 6px;
+            border: 2px solid #2196F3;
+        }
         .publish-btn {
             background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
             color: #fff;
@@ -115,6 +151,44 @@
         .publish-btn svg {
             width: 20px;
             height: 20px;
+        }
+        .selection-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        .selection-btn {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+        .selection-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+        }
+        .selection-counter {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: bold;
+            padding: 8px 12px;
+            background: #fff;
+            border-radius: 6px;
+            border: 2px solid #2196F3;
+            margin-left: auto;
         }
         .campeonato-section {
             margin-bottom: 12px;
@@ -162,6 +236,21 @@
             border-top: 4px solid;
             text-align: center;
             position: relative;
+        }
+        .bet-card.selected {
+            background: #e3f2fd;
+            box-shadow: 0 0 0 3px #2196F3;
+            transform: scale(1.02);
+        }
+        .bet-checkbox {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            z-index: 10;
+            accent-color: #2196F3;
         }
         .bet-card:hover {
             transform: translateY(-3px);
@@ -336,6 +425,19 @@
                     </button>
                 </div>
             </div>
+        </div>
+
+        <!-- Controles de Seleção -->
+        <div class="selection-controls">
+            <button class="selection-btn" onclick="selecionarTodas()" title="Selecionar todas as bets">
+                ✓ Selecionar Todas
+            </button>
+            <button class="selection-btn" onclick="deselecionarTodas()" title="Desselecionar todas as bets">
+                ✗ Desselecionar Todas
+            </button>
+            <span class="selection-counter" id="selection-counter">
+                📊 Selecionadas: <strong>0</strong> / <strong id="total-bets">0</strong>
+            </span>
         </div>
         
         <div class="campeonato-section">
@@ -713,7 +815,86 @@
         const API_URL = 'http://localhost:5000';
         const BACKEND_API_URL = 'http://localhost:3000'; // Backend BetApp
         
-        // Função para extrair bets da página
+        // Inicialização ao carregar a página
+        window.addEventListener('DOMContentLoaded', () => {
+            adicionarCheckboxes();
+            atualizarContador();
+            carregarInfoServidor();
+        });
+        
+        // Adiciona checkboxes em todas as bet-cards
+        function adicionarCheckboxes() {
+            const betCards = document.querySelectorAll('.bet-card');
+            betCards.forEach(card => {
+                // Verifica se já tem checkbox
+                if (!card.querySelector('.bet-checkbox')) {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'bet-checkbox';
+                    checkbox.checked = true; // Todas selecionadas por padrão
+                    checkbox.onchange = atualizarContador;
+                    
+                    // Adiciona evento de clique no card para marcar/desmarcar
+                    card.addEventListener('click', (e) => {
+                        if (e.target !== checkbox) {
+                            checkbox.checked = !checkbox.checked;
+                            card.classList.toggle('selected', checkbox.checked);
+                            atualizarContador();
+                        }
+                    });
+                    
+                    // Adiciona o checkbox no início do card
+                    card.insertBefore(checkbox, card.firstChild);
+                    
+                    // Adiciona classe selected se estiver marcado
+                    if (checkbox.checked) {
+                        card.classList.add('selected');
+                    }
+                }
+            });
+        }
+        
+        // Atualiza contador de bets selecionadas
+        function atualizarContador() {
+            const checkboxes = document.querySelectorAll('.bet-checkbox');
+            const total = checkboxes.length;
+            const selecionadas = Array.from(checkboxes).filter(cb => cb.checked).length;
+            
+            const counter = document.getElementById('selection-counter');
+            const totalElement = document.getElementById('total-bets');
+            
+            if (counter && totalElement) {
+                counter.innerHTML = `📊 Selecionadas: <strong>${selecionadas}</strong> / <strong id="total-bets">${total}</strong>`;
+                
+                // Atualiza classes selected nos cards
+                checkboxes.forEach(checkbox => {
+                    const card = checkbox.closest('.bet-card');
+                    if (card) {
+                        card.classList.toggle('selected', checkbox.checked);
+                    }
+                });
+            }
+        }
+        
+        // Seleciona todas as bets
+        function selecionarTodas() {
+            const checkboxes = document.querySelectorAll('.bet-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            atualizarContador();
+        }
+        
+        // Desseleciona todas as bets
+        function deselecionarTodas() {
+            const checkboxes = document.querySelectorAll('.bet-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            atualizarContador();
+        }
+        
+        // Função para extrair bets da página (MODIFICADA para filtrar selecionadas)
         function extrairBetsDaPagina() {
             const bets = [];
             const leagues = [];
@@ -732,6 +913,12 @@
                 // Extrai bets de cada seção
                 const betCards = section.querySelectorAll('.bet-card');
                 betCards.forEach(card => {
+                    // Verifica se a bet está selecionada
+                    const checkbox = card.querySelector('.bet-checkbox');
+                    if (!checkbox || !checkbox.checked) {
+                        return; // Pula bets não selecionadas
+                    }
+                    
                     // Extrai data
                     const dataElement = card.querySelector('.bet-data');
                     const dataHora = dataElement ? dataElement.textContent.trim() : 'A definir';
@@ -797,7 +984,16 @@
         async function publicarBets() {
             const btn = document.querySelector('.publish-btn');
             
-            if (!confirm('Publicar todas as bets no aplicativo móvel?')) {
+            // Conta quantas bets estão selecionadas
+            const checkboxes = document.querySelectorAll('.bet-checkbox:checked');
+            const totalSelecionadas = checkboxes.length;
+            
+            if (totalSelecionadas === 0) {
+                alert('⚠️ Nenhuma bet selecionada!\n\nSelecione pelo menos uma bet para publicar.');
+                return;
+            }
+            
+            if (!confirm(`📤 Publicar ${totalSelecionadas} bet(s) selecionada(s) no aplicativo móvel?`)) {
                 return;
             }
             
@@ -806,7 +1002,7 @@
             btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Publicando...';
             
             try {
-                // Extrai bets da página
+                // Extrai bets da página (apenas selecionadas)
                 const { bets, leagues } = extrairBetsDaPagina();
                 
                 if (bets.length === 0) {
@@ -877,9 +1073,6 @@
                 document.getElementById('server-time').textContent = 'Servidor offline';
             }
         }
-        
-        // Carrega info do servidor ao carregar a página
-        window.addEventListener('DOMContentLoaded', carregarInfoServidor);
         
         async function atualizarCampeonato(campeonato) {
             const progressContainer = document.getElementById(`progress-${campeonato}`);
