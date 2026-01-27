@@ -826,6 +826,7 @@
             
             const counter = document.getElementById('selection-counter');
             const totalElement = document.getElementById('total-bets');
+            const publishBtn = document.querySelector('.publish-btn');
             
             if (counter && totalElement) {
                 counter.innerHTML = `📊 Selecionadas: <strong>${selecionadas}</strong> / <strong id="total-bets">${total}</strong>`;
@@ -837,6 +838,13 @@
                         card.classList.toggle('selected', checkbox.checked);
                     }
                 });
+            }
+            
+            // Habilita/desabilita botão "Publicar no App" baseado na seleção
+            if (publishBtn) {
+                publishBtn.disabled = (selecionadas === 0);
+                publishBtn.style.opacity = (selecionadas === 0) ? '0.5' : '1';
+                publishBtn.style.cursor = (selecionadas === 0) ? 'not-allowed' : 'pointer';
             }
         }
         
