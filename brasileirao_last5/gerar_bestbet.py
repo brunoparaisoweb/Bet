@@ -933,8 +933,8 @@ def gerar_html_bestbet():
             <button class="selection-btn" onclick="selecionarTodas()" title="Selecionar todas as bets">
                 ✓ Selecionar Todas
             </button>
-            <button class="selection-btn" onclick="deselecionarTodas()" title="Desselecionar todas as bets">
-                ✗ Desselecionar Todas
+            <button class="selection-btn" onclick="deselecionarTodas()" title="Limpar Selecionadas">
+                ✗ Limpar Selecionadas
             </button>
             <span class="selection-counter" id="selection-counter">
                 📊 Selecionadas: <strong>0</strong> / <strong id="total-bets">0</strong>
