@@ -900,8 +900,8 @@ def gerar_html_bestbet():
             const campeonatoSections = document.querySelectorAll('.campeonato-section');
             
             campeonatoSections.forEach(section => {
-                const header = section.querySelector('.campeonato-header');
-                const leagueName = header ? header.textContent.split('Ver')[0].trim() : '';
+                const header = section.querySelector('.campeonato-header .header-content');
+                const leagueName = header ? header.textContent.trim() : '';
                 
                 if (leagueName && !leagues.includes(leagueName)) {
                     leagues.push(leagueName);
@@ -910,32 +910,60 @@ def gerar_html_bestbet():
                 // Extrai bets de cada seção
                 const betCards = section.querySelectorAll('.bet-card');
                 betCards.forEach(card => {
-                    const confronto = card.querySelector('.confronto')?.textContent.trim() || '';
-                    const dataHora = card.querySelector('.data-hora')?.textContent.trim() || '';
-                    const recomendacao = card.querySelector('.bet-time')?.textContent.trim() || '';
-                    const deltaElement = card.querySelector('.bet-delta');
-                    const delta = deltaElement ? deltaElement.textContent.replace('Δ', '').trim() : '0';
+                    // Extrai data
+                    const dataElement = card.querySelector('.bet-data');
+                    const dataHora = dataElement ? dataElement.textContent.trim() : 'A definir';
                     
-                    // Extrai data e hora separadamente
-                    const [data, hora] = dataHora.split(' - ');
+                    // Separa data e hora
+                    let data = '';
+                    let hora = '';
+                    if (dataHora && dataHora !== 'A definir') {
+                        const partes = dataHora.split(' ');
+                        data = partes[0] || '';
+                        hora = partes[1] || '';
+                    }
                     
                     // Extrai times e escudos
-                    const timesElements = card.querySelectorAll('.time img');
-                    const times = Array.from(timesElements).map(img => img.alt || '');
-                    const badges = Array.from(timesElements).map(img => img.src || '');
+                    const timesElements = card.querySelectorAll('.time-linha');
+                    const times = [];
+                    const badges = [];
+                    let timeRecomendado = '';
                     
+                    timesElements.forEach(timeLinha => {
+                        const img = timeLinha.querySelector('img');
+                        const timeDestaque = timeLinha.querySelector('.time-destaque');
+                        
+                        // Pega o nome do time
+                        let timeText = '';
+                        if (timeDestaque) {
+                            timeText = timeDestaque.textContent.trim();
+                            timeRecomendado = timeText;
+                        } else if (img) {
+                            timeText = img.alt || '';
+                        }
+                        
+                        times.push(timeText);
+                        badges.push(img ? img.src : '');
+                    });
+                    
+                    // Monta o confronto
+                    const match = times.join(' x ');
+                    
+                    // Cria objeto da bet
                     bets.push({
                         league: leagueName,
-                        match: confronto,
-                        date: data?.trim() || '',
-                        time: hora?.trim() || '',
+                        match: match,
+                        date: data,
+                        time: hora,
                         dateTime: dataHora,
                         homeTeam: times[0] || '',
                         awayTeam: times[1] || '',
                         homeBadge: badges[0] || '',
                         awayBadge: badges[1] || '',
-                        recommendation: recomendacao,
-                        delta: parseFloat(delta) || 0
+                        bet: timeRecomendado,
+                        recommendation: timeRecomendado,
+                        difference: 0,
+                        delta: 0
                     });
                 });
             });
