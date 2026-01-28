@@ -6,16 +6,16 @@ Próxima rodada e classificação atual
 
 # Próxima rodada da Serie A (Rodada 23)
 PROXIMA_RODADA = [
-    {"time1": "Bologna", "time2": "Milan", "data": "31/01/26"},
-    {"time1": "Cagliari", "time2": "Hellas Verona", "data": "31/01/26"},
-    {"time1": "Como", "time2": "Atalanta", "data": "31/01/26"},
-    {"time1": "Cremonese", "time2": "Internazionale", "data": "31/01/26"},
-    {"time1": "Lazio", "time2": "Genoa", "data": "31/01/26"},
-    {"time1": "Napoli", "time2": "Fiorentina", "data": "31/01/26"},
-    {"time1": "Parma", "time2": "Juventus", "data": "31/01/26"},
-    {"time1": "Pisa", "time2": "Sassuolo", "data": "31/01/26"},
-    {"time1": "Torino", "time2": "Lecce", "data": "31/01/26"},
-    {"time1": "Udinese", "time2": "Roma", "data": "31/01/26"}
+    {"time1": "Lazio", "time2": "Genoa", "data": "30/01/26 16:45"},
+    {"time1": "Pisa", "time2": "Sassuolo", "data": "31/01/26 11:00"},
+    {"time1": "Napoli", "time2": "Fiorentina", "data": "31/01/26 14:00"},
+    {"time1": "Cagliari", "time2": "Hellas Verona", "data": "31/01/26 16:45"},
+    {"time1": "Torino", "time2": "Lecce", "data": "01/02/26 08:30"},
+    {"time1": "Como", "time2": "Atalanta", "data": "01/02/26 11:00"},
+    {"time1": "Cremonese", "time2": "Internazionale", "data": "01/02/26 14:00"},
+    {"time1": "Parma", "time2": "Juventus", "data": "01/02/26 16:45"},
+    {"time1": "Udinese", "time2": "Roma", "data": "02/02/26 16:45"},
+    {"time1": "Bologna", "time2": "Milan", "data": "03/02/26 16:45"}
 ]
 
 # Classificação atual da Serie A
