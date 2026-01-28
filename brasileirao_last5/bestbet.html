@@ -876,7 +876,10 @@
             
             campeonatoSections.forEach(section => {
                 const header = section.querySelector('.campeonato-header .header-content');
-                const leagueName = header ? header.textContent.trim() : '';
+                let leagueName = header ? header.textContent.trim() : '';
+                
+                // Remove informação de data/hora de atualização
+                leagueName = leagueName.replace(/Atualizado:.*$/, '').trim();
                 
                 if (leagueName && !leagues.includes(leagueName)) {
                     leagues.push(leagueName);
