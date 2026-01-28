@@ -149,6 +149,7 @@ def extrair_bets_padrao(html_path, campeonato):
             'Paris Saint-.': 'Paris Saint-Germain',
             'Saint-Étienn.': 'Saint-Étienne',
             'Olympique de.': 'Olympique de Marselha',
+            'Hellas Veron.': 'Hellas Verona',
             'OLY': 'Olympique de Marselha',
             'WOL': 'Wolverhampton',
             'BOU': 'Bournemouth',
